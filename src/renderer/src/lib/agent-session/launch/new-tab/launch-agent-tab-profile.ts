@@ -4,6 +4,7 @@ import { runtimeEnvironmentIdOrLocalUnlessTwin } from '@/lib/workspace/ownership
 import { worktreeUsesWslPath } from '@/store/terminals/tabs/creation/terminal-workspace-routing'
 import type { AppState } from '@/store/types'
 import type { AgentProfileLaunchRequest } from '../../../../../../shared/agent-profile/claude-profile-startup-args'
+import { readEffectiveAgentProfiles } from '@/lib/agent-session/launch/profile/effective-agent-profiles'
 import { resolveAgentProfileLaunchRequest } from '@/lib/agent-session/launch/profile/agent-profile-launch-request'
 import type { LaunchAgentInNewTabArgs } from './launch-agent-in-new-tab-args'
 import type { AgentTabLaunchOutcome } from './launch-agent-in-new-tab-host-agents'
@@ -48,7 +49,7 @@ export function planNewTabAgentProfile(
   const resolved = resolveAgentProfileLaunchRequest({
     agent: args.agent,
     profileId: args.agentProfileId,
-    profiles: store.settings?.agentProfiles,
+    profiles: readEffectiveAgentProfiles(store.settings?.agentProfiles),
     hostIsLocal:
       !isRemote &&
       !worktreeUsesWslPath(store, args.worktreeId) &&
