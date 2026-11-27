@@ -1,6 +1,6 @@
 import { access, mkdtemp, readFile, rm, stat, statfs, writeFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { homedir, tmpdir } from 'node:os'
+import { delimiter, join } from 'node:path'
 import { runProcess } from '@orca/process-host'
 import {
   findCommandsOnLocalPath,
@@ -27,6 +27,8 @@ export function createHostEnvironmentDoctorDeps(
   options: {
     /** Long-lived servers re-read the login shell so a retry sees tools installed since startup. */
     refreshShellPath?: boolean
+    /** Workstation target list; defaults to $ORCA_WORKSTATION_REQUIREMENTS, then ~/.orca/workstation-requirements.json. */
+    workstationRequirementsPath?: string
   } = {}
 ): EnvironmentDoctorDeps {
   const baseEnv = (): NodeJS.ProcessEnv => buildLocalPreflightEnv() ?? process.env
@@ -54,6 +56,15 @@ export function createHostEnvironmentDoctorDeps(
     run,
     findCommands: (commands) => findCommandsOnLocalPath(commands, { env: baseEnv() }),
     detectAgents: () => detectInstalledAgents(),
+    readWorkstationRequirements: () =>
+      readFile(
+        options.workstationRequirementsPath ??
+          process.env.ORCA_WORKSTATION_REQUIREMENTS ??
+          join(homedir(), '.orca', 'workstation-requirements.json'),
+        'utf8'
+      ).catch(() => null),
+    pathEntries: () => (baseEnv().PATH ?? baseEnv().Path ?? '').split(delimiter).filter(Boolean),
+    homeDir: homedir(),
     readFile: (path) => readFile(path, 'utf8').catch(() => null),
     exists: (path) =>
       access(path).then(
