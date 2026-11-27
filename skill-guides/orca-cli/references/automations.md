@@ -16,9 +16,9 @@ ORCA automations remove <automationId> --json   # or: automations delete
 
 Schedules accept `hourly`, `daily`, `weekdays`, `weekly`, 5-field cron, or an RRULE built from FREQ=HOURLY|DAILY|WEEKLY, BYDAY (weekly only), BYHOUR (daily/weekly) and BYMINUTE. Use `--time <HH:MM>` with `daily`/`weekdays`/`weekly`, and `--day <0-6>` only with `weekly` where Sunday is `0`.
 
-Use `--precheck <command>` to run a shell command only before scheduled runs. Exit code `0` continues; any other exit, error, or timeout skips the run. Set the time limit with `--precheck-timeout <seconds>` (default `60`). Skips appear in Orca run history and `ORCA automations runs --id <automationId> --json` with status `skipped_precheck`.
+Use `--precheck <command>` to run a shell command before scheduled and manual runs. Exit code `0` starts the run; exit code `1` skips it, and the first line the command printed becomes the reason (status `skipped_precheck`); any other exit code, an error, or a timeout fails the run (status `dispatch_failed`). Set the time limit with `--precheck-timeout <seconds>` (default `60`). Both outcomes appear in Orca run history and `ORCA automations runs --id <automationId> --json` with the precheck result.
 
-**Run now** in Orca and `ORCA automations run <automationId>` intentionally bypass the precheck, so you can test the automation or override its scheduled condition.
+**Run now** in Orca and `ORCA automations run <automationId>` run the precheck too, so a manual run cannot start an agent the scheduled condition would have declined.
 
 Use `--repo <selector>` for a new worktree per run, or `--workspace <selector>` / `--workspace-mode existing` for an existing Orca worktree. `--repo` and `--workspace` are mutually exclusive. Use `--reuse-session` only for existing-workspace automations; if the previous terminal is gone, Orca falls back to a fresh session. Prefer `--disabled` while testing setup.
 

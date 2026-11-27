@@ -269,6 +269,7 @@ export async function composeDesktopCore(
     codexUsage: core.codexUsage!,
     // Remote clients mirror schedules; only server processes execute remote_host_service ownership.
     allowRemoteHostScheduling: native.isServeMode(),
+    readRateLimits: async () => (await core.rateLimits?.getState()) ?? null,
     // A macOS update closes windows long before will-quit.
     isHostQuitting: () => native.isQuitting() || native.isNativeUpdateInstallUnderWay()
   })

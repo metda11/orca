@@ -4,8 +4,15 @@ Fork-specific changes on top of stablyai/orca. Format: [Keep a Changelog](https:
 
 ## [Unreleased]
 
+### Changed
+
+- Automation precheck result: exit code `1` skips the run (`skipped_precheck`) and shows the first line the command printed as the reason; every other non-zero exit code, an error or a timeout now fails the run (`dispatch_failed`). Before, exit codes 2 and up were also recorded as skipped, so a broken precheck script now shows up as a failure instead of a quiet skip.
+- Run now and `orca automations run` run the precheck too (before, only scheduled runs did). Event runs still skip it.
+- A run of an automation on an existing workspace folder waits (stays queued) while another run on the same folder is starting or running, and starts when that run ends.
+
 ### Added
 
+- Automation runs hold while the agent's account (Claude or Codex) has used up a usage window: the run stays queued until the reset and starts then. Desktop only; a run held this way is not carried across an Orca restart.
 - `orca vm env doctor` gains a `workstation` check group driven by a JSON target list (`--requirements`, `$ORCA_WORKSTATION_REQUIREMENTS`, or `~/.orca/workstation-requirements.json`; no file, no group): commands with minimum version, Claude marketplaces and plugins, PATH entries, each reported `pass` / `fail` / `skip` (not verifiable). Foreign hooks in `~/.claude/settings.json` show up as `info`. `--fix <check-id>` runs only allowlisted repairs (`claude plugin install`, `claude plugin marketplace add`, `npm install -g`, `dotnet tool install`). Format: [docs/workstation-requirements.md](docs/workstation-requirements.md). No GUI button yet.
 - `config/scripts/local-fork/start-local-fork.ps1`: builds the fork from the checkout and starts it on Windows (`-Mode Dev` or `-Mode Packaged`).
 - RPC method `claudePlugins.inventory`: lists the Claude plugins of an account (`accountHomePath`, default the host's) for a workspace (`worktreeId` or `cwd`), each with scope, enabled state, version, declared dependencies, skills, agents, commands and MCP servers, plus the workspace's `.mcp.json` servers. Org-synced plugins (`<name>@synced`) are included. Read from config files and plugin folders, cached for 30 s. Not yet available for SSH or WSL workspaces.

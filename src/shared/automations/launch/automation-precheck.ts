@@ -46,3 +46,38 @@ export function formatAutomationPrecheckFailure(result: AutomationPrecheckResult
   }
   return `Precheck exited with code ${result.exitCode ?? 'unknown'}.`
 }
+
+export type AutomationPrecheckOutcome = 'pass' | 'skip' | 'fail'
+
+/** Exit 0 starts the run, exit 1 skips it on purpose, anything else (other code, timeout, spawn error) is a failure. */
+export function getAutomationPrecheckOutcome(
+  result: AutomationPrecheckResult
+): AutomationPrecheckOutcome {
+  if (didAutomationPrecheckPass(result)) {
+    return 'pass'
+  }
+  return !result.timedOut && !result.error && result.exitCode === 1 ? 'skip' : 'fail'
+}
+
+/** Scheduled and manual runs consult the precheck; an event run starts as the event says. */
+export function automationTriggerRunsPrecheck(trigger: 'scheduled' | 'manual' | 'event'): boolean {
+  return trigger !== 'event'
+}
+
+const MAX_PRECHECK_SKIP_REASON_CHARS = 200
+
+/** The skip reason is the first line the precheck printed, so the script says why it declined. */
+export function formatAutomationPrecheckSkip(result: AutomationPrecheckResult): string {
+  const reason = [result.stdout, result.stderr]
+    .map(
+      (text) =>
+        text
+          .split(/\r?\n/)
+          .find((line) => line.trim() !== '')
+          ?.trim() ?? ''
+    )
+    .find((line) => line !== '')
+  return reason
+    ? `Precheck skipped the run: ${reason.slice(0, MAX_PRECHECK_SKIP_REASON_CHARS)}`
+    : 'Precheck skipped the run (exit code 1).'
+}

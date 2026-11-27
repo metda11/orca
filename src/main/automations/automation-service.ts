@@ -5,11 +5,10 @@ import {
 } from './dispatch/automation-dispatch-request'
 import { AutomationDispatchCancelledError } from './dispatch/automation-dispatch-cancelled-error'
 import type { Store } from '../persistence/loading-store/store'
-import {
-  isFinalAutomationRunStatus,
-  type AutomationDispatchResult,
-  type AutomationPrecheckResult,
-  type AutomationRun
+import type {
+  AutomationDispatchResult,
+  AutomationPrecheckResult,
+  AutomationRun
 } from '../../shared/automations/history/automation-run'
 import type { Automation } from '../../shared/automations/automation-definition'
 import {
@@ -17,11 +16,10 @@ import {
   resolveAutomationRunTarget,
   type AutomationRunTargetResult
 } from './ownership/run-target-resolution'
-import { writeAutomationRunUsage } from './run-history/run-usage-collection'
+import { settleAutomationDispatchResult } from './run-history/automation-run-settlement'
 import type * as Launch from './launch/automation-launch'
 import { runKeyedSerializedOperation } from '../../shared/concurrency/keyed-serialized-operations'
 import { createCoalescingKeyedRunner } from '../../shared/concurrency/coalescing-keyed-runner'
-import { clearAutomationDispatchTokens } from './ownership/dispatch-tokens'
 import {
   AutomationRunCompletionWatcher,
   type AutomationRunTerminalObserver
@@ -48,6 +46,10 @@ import {
   type EventRunOptions
 } from './automation-trigger-runs'
 import { runDueAutomations } from './automation-due-runs'
+import {
+  AutomationDispatchHolds,
+  type AutomationUsageLimitHold
+} from './dispatch/automation-dispatch-holds'
 
 const DEFAULT_TICK_MS = 60 * 1000
 
@@ -74,6 +76,7 @@ export class AutomationService {
   onTick: (() => void) | null = null
   private readonly publish: PublishAutomationsChanged | null
   private readonly runs: AutomationRunWriter
+  private readonly holds: AutomationDispatchHolds
   private readonly completionWatcher: AutomationRunCompletionWatcher | null
   /** Desktop automation traffic holds this lease to defer queued external probes. */
   externalProbePriority: (<T>(run: () => T) => T) | null = null
@@ -93,6 +96,8 @@ export class AutomationService {
       terminalObserver?: AutomationRunTerminalObserver
       isHostQuitting?: () => boolean
       onAutomationsChanged?: PublishAutomationsChanged
+      /** The time the agent's account resets when its usage limit is used up; null when it may start. */
+      usageLimitHoldUntil?: AutomationUsageLimitHold
       runTerminalRetention?: (service: AutomationService) => RunTerminalRetention
     } = {}
   ) {
@@ -106,7 +111,11 @@ export class AutomationService {
     this.onRunRefused = opts.onRunRefused ?? null
     this.chatDispatcher = opts.chatDispatcher ?? null
     this.publish = opts.onAutomationsChanged ?? null
-    this.runs = createAutomationRunWriter(store, this.publish)
+    this.holds = new AutomationDispatchHolds(
+      (held) => this.launchInLane(held.automation, held.run, held.target, held.generation),
+      opts.usageLimitHoldUntil
+    )
+    this.runs = this.holds.releasingFolderHolds(createAutomationRunWriter(store, this.publish))
     this.completionWatcher = opts.terminalObserver
       ? new AutomationRunCompletionWatcher({
           observer: opts.terminalObserver,
@@ -132,6 +141,8 @@ export class AutomationService {
       this.onTick?.()
       void this.evaluateDueRuns()
       void this.runTerminalRetention?.sweep()
+      // Backstop for a folder freed by a run no write of ours observed.
+      this.holds.retryFolderHolds()
     }, this.tickMs)
     // Settles unclaimed pending rows before catch-up could claim one again.
     this.completionWatcher?.reconcileRetainedRuns(this.store.listAutomationRuns())
@@ -144,6 +155,7 @@ export class AutomationService {
   stop(): void {
     this.stopped = true
     this.dispatchGeneration += 1
+    this.holds.clear()
     this.completionWatcher?.dispose()
     clearInterval(this.timer ?? undefined)
     this.timer = null
@@ -217,27 +229,17 @@ export class AutomationService {
     )
   }
 
-  async markDispatchResult(result: AutomationDispatchResult): Promise<AutomationRun> {
-    const run = await this.runs.updateRun(result)
-    clearAutomationDispatchTokens(run.automationId, run.id)
-    if (!isFinalAutomationRunStatus(run.status)) {
-      if (run.status === 'dispatched') {
-        this.completionWatcher?.watch(run)
-      }
-      return run
-    }
-    this.completionWatcher?.forget(run.id)
-    // Duplicate completion effects must not recalculate usage with a later attribution window.
-    if (run.usage) {
-      return run
-    }
-    return await writeAutomationRunUsage({
-      store: this.store,
-      runs: this.runs,
-      run,
-      claudeUsage: this.claudeUsage,
-      codexUsage: this.codexUsage
-    })
+  markDispatchResult(result: AutomationDispatchResult): Promise<AutomationRun> {
+    return settleAutomationDispatchResult(
+      {
+        store: this.store,
+        runs: this.runs,
+        completionWatcher: this.completionWatcher,
+        claudeUsage: this.claudeUsage,
+        codexUsage: this.codexUsage
+      },
+      result
+    )
   }
 
   /** A tick during a pass queues one more pass at that tick's time; later ticks replace it, so a pass spanning two or more ticks catches up only the newest one. */
@@ -319,6 +321,7 @@ export class AutomationService {
           chatDispatcher:
             this.allowRemoteHostScheduling || this.availableLauncher() ? this.chatDispatcher : null,
           resolveTarget: (current) => this.resolveTarget(current),
+          ...this.holds.dispatchContext(generation),
           ...(this.onRunRefused ? { onRunRefused: this.onRunRefused } : {}),
           runPrecheck: () => this.runPrecheck(automation.id, run.id),
           markDispatchResult: (result) => this.markDispatchResult(result),
