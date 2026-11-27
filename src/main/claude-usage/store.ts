@@ -10,6 +10,7 @@ import type {
   ClaudeUsageSnapshot,
   ClaudeUsageSummary
 } from '../../shared/agent-usage/analytics/claude-usage-types'
+import type { ClaudeProfileLoadoutReport } from '../../shared/agent-usage/analytics/claude-profile-usage-types'
 import type { AutomationRunUsage } from '../../shared/automations/history/automation-run'
 import type { UsageStoreHost } from '../usage/usage-store-host'
 import type { ClaudeUsagePersistedState } from './types'
@@ -18,6 +19,10 @@ import {
   splitUsageCacheFileViaWorker
 } from '../usage/scan-worker/usage-scan-worker-spawn'
 import { UsageProviderStoreLifecycle } from '../usage/provider-lifecycle/usage-provider-store-lifecycle'
+import { readClaudeTranscriptLoadout } from './loadout/claude-transcript-loadout'
+import { buildProfileLoadoutReport } from './loadout/profile-loadout-report'
+import { readProfileRuns } from './loadout/profile-run-registry'
+import { listClaudeTranscriptFiles } from './transcript-file-discovery'
 import { buildBreakdown, buildDaily, buildSummary } from './claude-usage-report-aggregation'
 import { buildRecentSessions } from './claude-usage-session-rows'
 import type { AutomationUsageLookupInput } from './claude-usage-automation-attribution'
@@ -68,14 +73,14 @@ export class ClaudeUsageStore extends UsageProviderStoreLifecycle<
   ClaudeUsagePersistedState,
   'hasAnyClaudeData'
 > {
-  constructor(host: UsageStoreHost) {
-    super(host, {
+  constructor(private readonly usageHost: UsageStoreHost) {
+    super(usageHost, {
       tokenUsage: {
         provider: 'claude',
         selectDays: (state) => claudeTokenDays(state.dailyAggregates)
       },
       logTag: '[claude-usage]',
-      resolveCacheFile: () => join(host.userDataPath, 'orca-claude-usage.json'),
+      resolveCacheFile: () => join(usageHost.userDataPath, 'orca-claude-usage.json'),
       createDefaultState: getDefaultState,
       normalizeState: normalizePersistedState,
       parseReport: parseClaudeUsageReport,
@@ -85,8 +90,8 @@ export class ClaudeUsageStore extends UsageProviderStoreLifecycle<
       sourceKey: 'processedFiles',
       dataPresenceKey: 'hasAnyClaudeData',
       scan: async (worktrees, sourceCache) => {
-        const profileDirs = await host.claudeProfileDirs()
-        host.signal.throwIfAborted()
+        const profileDirs = await usageHost.claudeProfileDirs()
+        usageHost.signal.throwIfAborted()
         return scanClaudeUsageFilesViaWorker(worktrees, sourceCache, profileDirs)
       },
       splitCacheFile: splitUsageCacheFileViaWorker
@@ -137,6 +142,19 @@ export class ClaudeUsageStore extends UsageProviderStoreLifecycle<
   ): Promise<ClaudeUsageSessionRow[]> {
     await this.refresh(false)
     return buildRecentSessions(this.state, scope, range, limit)
+  }
+
+  async getProfileLoadoutReport(): Promise<ClaudeProfileLoadoutReport> {
+    await this.refresh(false)
+    return buildProfileLoadoutReport(
+      await readProfileRuns(this.usageHost.userDataPath),
+      this.state.sessions,
+      {
+        listTranscriptFiles: async () =>
+          listClaudeTranscriptFiles(await this.usageHost.claudeProfileDirs()),
+        readLoadout: readClaudeTranscriptLoadout
+      }
+    )
   }
 
   async getAutomationRunUsage(input: AutomationUsageLookupInput): Promise<AutomationRunUsage> {

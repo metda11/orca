@@ -38,4 +38,8 @@ export type ClaudeAgentProfile = {
 export type AgentProfileSettings = {
   /** Named Claude Code loadouts a launch can pick by id. */
   agentProfiles?: ClaudeAgentProfile[]
+  /** Folder of `*.json` profiles shared by a team; read, never written. Unset means no central profiles. */
+  agentProfileCentralDir?: string
+  /** Template digest per bundled default id at the time it was copied/reset; a present key means "seeded once". */
+  agentProfileDefaultBaselines?: Record<string, string>
 }
