@@ -14,6 +14,7 @@ import {
 } from './environment-doctor-check'
 import { checkGit, probeGitCheckout, type GitCheckoutProbe } from './environment-doctor-git'
 import { checkSetup } from './environment-doctor-setup'
+import { checkWorkstation } from './environment-doctor-workstation'
 
 export type {
   EnvironmentDoctorCommandResult,
@@ -92,6 +93,7 @@ export async function runEnvironmentDoctor(
     hasGit ? checkGit(checkout, deps) : Promise.resolve([]),
     checkDisk(root, deps)
   ])
+  const workstationChecks = await checkWorkstation(deps, root)
   const setupChecks = await checkSetup(deps, {
     root,
     runSetup: options.runSetup === true,
@@ -105,7 +107,8 @@ export async function runEnvironmentDoctor(
     ...agentChecks,
     ...gitChecks,
     ...setupChecks,
-    ...diskChecks
+    ...diskChecks,
+    ...workstationChecks
   ])
 }
 
