@@ -4,6 +4,7 @@ import { runPtySpawn, normalizePtySpawnSessionId } from '../spawn/spawn-operatio
 import { checkPtyIpcLaunchPane, resolveEarlyPaneKey } from './spawn-begin'
 import { stopReplacedPaneOwner } from '../pane/pane-owner-replacement'
 import { keepAbsentBindingForSwap } from './spawn-absent-binding-swap'
+import { prepareAgentProfileForPtySpawn } from '../../../claude/agent-profile/agent-profile-spawn-preparation'
 import { planPaneAgentLaunch } from './spawn-agent-launch'
 import { applyAgentLaunchPluginHook } from '../spawn/spawn-agent-launch-plugin-hook'
 import { endPaneAgentLaunch } from './spawn-agent-launch-end'
@@ -49,6 +50,14 @@ export async function runPtyIpcSpawn(deps: PtySpawnIpcDeps, request: PtySpawnIpc
       }
       if (!ctx.earlyStablePaneOwner) {
         ctx.args = await applyAgentLaunchPluginHook(ctx.args, deps.runtime)
+      }
+      if (!ctx.earlyStablePaneOwner && ctx.args.agentProfileId !== undefined) {
+        await prepareAgentProfileForPtySpawn({
+          profileId: ctx.args.agentProfileId,
+          connectionId: ctx.args.connectionId,
+          cwd: ctx.args.cwd,
+          settings: deps.getSettings?.()
+        })
       }
       await preparePtyIpcSpawnPreflight(ctx)
       await assemblePtyIpcSpawnEnv(ctx)

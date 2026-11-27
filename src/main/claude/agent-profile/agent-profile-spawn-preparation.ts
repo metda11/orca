@@ -1,0 +1,47 @@
+import { join } from 'node:path'
+import { getAppEnvironment } from '../../../shared/app-lifecycle/app-environment'
+import type { GlobalSettings } from '../../../shared/settings/global-settings-types'
+import {
+  AgentProfileLaunchError,
+  findClaudeAgentProfile
+} from '../../../shared/agent-profile/claude-profile-startup-args'
+import {
+  claudeProfileLaunchFiles,
+  isSafeAgentProfileId
+} from '../../../shared/agent-profile/claude-profile-files'
+import { buildClaudeProfileLaunch } from '../../../shared/agent-profile/claude-profile-launch-args'
+import { readClaudePluginInventory } from '../plugin-inventory/claude-plugin-inventory'
+import { materializeClaudeProfileFiles } from './claude-profile-file-materialization'
+
+/** Write the files a profile start points at; refuses what the renderer's plan cannot have covered. */
+export async function prepareAgentProfileForPtySpawn(args: {
+  profileId: unknown
+  connectionId?: string | null
+  cwd?: string
+  settings: Pick<GlobalSettings, 'agentProfiles'> | undefined
+  userDataDir?: string
+}): Promise<void> {
+  if (typeof args.profileId !== 'string' || !isSafeAgentProfileId(args.profileId)) {
+    throw new AgentProfileLaunchError('agent_profile_id_invalid')
+  }
+  // Why: a remote host cannot read this machine's userData, and the profile argv would point there.
+  if (args.connectionId) {
+    throw new AgentProfileLaunchError('agent_profile_host_unsupported')
+  }
+  const profile = findClaudeAgentProfile(args.settings?.agentProfiles, args.profileId)
+  // Why: routing a start through a managed account is not wired yet; the default account would be a silent mismatch.
+  if (profile.accountId) {
+    throw new AgentProfileLaunchError('agent_profile_account_unsupported')
+  }
+  const rootDir = args.userDataDir ?? join(getAppEnvironment().getPath('userData'))
+  const files = claudeProfileLaunchFiles(rootDir, profile.id)
+  const installedPluginIds = profile.enabledPlugins
+    ? (
+        await readClaudePluginInventory({ accountHomePath: null, cwd: args.cwd ?? null })
+      ).plugins.map((plugin) => plugin.id)
+    : []
+  await materializeClaudeProfileFiles(
+    buildClaudeProfileLaunch(profile, { installedPluginIds, files }),
+    files
+  )
+}

@@ -323,6 +323,7 @@ export type IpcPtyTransportOptions = {
   launchAgent?: TuiAgent
   agentLaunch?: AgentPaneLaunchRequest
   trustWorktreeId?: string
+  agentProfileId?: string
   startupCommandDelivery?: StartupCommandDelivery
   connectionId?: string | null
   executionHostId?: ExecutionHostId | null

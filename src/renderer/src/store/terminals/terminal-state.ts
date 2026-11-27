@@ -77,6 +77,8 @@ export type TerminalState = {
       launchToken?: string
       launchAgent?: TuiAgent
       trustWorktreeId?: string
+      /** Saved Claude loadout main writes the files of before this start's PTY spawns. */
+      agentProfileId?: string
       /** The agent launch the pane's own spawn starts, instead of `command`. */
       agentLaunch?: AgentPaneLaunchRequest
       freshAgentLaunch?: FreshWorkspaceAgentLaunch

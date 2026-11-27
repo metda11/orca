@@ -63,6 +63,7 @@ export type PtyApi = {
     launchToken?: string
     launchAgent?: TuiAgent
     trustWorktreeId?: string
+    agentProfileId?: string
     startupCommandDelivery?: StartupCommandDelivery
     connectionId?: string | null
     worktreeId?: string

@@ -31,6 +31,7 @@ import {
 import { launchStructuredAgentFromNewTab } from '@/lib/agent-session/launch/new-tab/launch-agent-in-new-tab-structured-route'
 import '@/lib/agent-session/launch/routing/agent-launch-route-input'
 import { workspaceKindForWorktreeId } from '../../../../../../shared/agent-launch/contracts/workspace-launch-kind'
+import { planNewTabAgentProfile, refuseAgentProfileInChat } from './launch-agent-tab-profile'
 import { launchOnceHostAnswered, routeNewTabLaunch } from './launch-agent-in-new-tab-host-agents'
 import type { AgentTabLaunchOutcome } from './launch-agent-in-new-tab-host-agents'
 
@@ -115,6 +116,9 @@ function openAgentInNewTab(
   }
   const { plan } = route
   if (plan?.route === 'structured-native-chat') {
+    if (args.agentProfileId) {
+      return refuseAgentProfileInChat(args, notifyFailure)
+    }
     const structured = launchStructuredAgentFromNewTab({
       plan,
       worktreeId,
@@ -159,6 +163,11 @@ function openAgentInNewTab(
   if (argsProblem) {
     return refuseAgentTabLaunch(args, argsProblem, () => toast.error(argsProblem), notifyFailure)
   }
+  const profilePlan = planNewTabAgentProfile(args, { store, isRemote, notifyFailure })
+  if ('refused' in profilePlan) {
+    return profilePlan.refused
+  }
+  const agentProfile = profilePlan.request
   const buildStartup = (
     agentLaunchChoices = readAgentLaunchPreferencesForWorktree(store, worktreeId).agentLaunchChoices
   ) =>
@@ -171,7 +180,8 @@ function openAgentInNewTab(
         sessionOptionsYieldToAgentArgs: args.sessionOptionsYieldToAgentArgs,
         platform: resolvedLaunchPlatform,
         shell: queuedShell,
-        isRemote
+        isRemote,
+        agentProfile
       }),
       prompt: trimmedPrompt,
       promptDelivery,
@@ -256,6 +266,7 @@ function openAgentInNewTab(
     ...(activate === false ? { activate: false } : {}),
     pendingStartup: {
       ...(trustWorktreeId ? { trustWorktreeId } : {}),
+      ...(agentProfile ? { agentProfileId: agentProfile.id } : {}),
       command: startupPlan.launchCommand,
       ...(startupPlan.env ? { env: startupPlan.env } : {}),
       launchConfig: startupPlan.launchConfig,
