@@ -2,7 +2,8 @@ import { readdir, readFile, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import {
   CLAUDE_PROFILE_PERMISSION_MODES,
-  type ClaudeAgentProfile
+  type ClaudeAgentProfile,
+  type ClaudeProfilePermissionMode
 } from '../../../shared/agent-profile/agent-profile-types'
 import { isSafeAgentProfileId } from '../../../shared/agent-profile/claude-profile-files'
 import type { AgentProfileCatalogWarning } from '../../../shared/agent-profile/agent-profile-catalog'
@@ -25,64 +26,82 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-function optionalOk<T>(value: unknown, check: (v: unknown) => v is T): boolean {
-  return value === undefined || check(value)
+const isString = (v: unknown): v is string => typeof v === 'string'
+const isMcp = (v: unknown): v is Record<string, Record<string, unknown>> =>
+  isPlainObject(v) && Object.values(v).every(isPlainObject)
+const isMode = (v: unknown): v is ClaudeProfilePermissionMode =>
+  CLAUDE_PROFILE_PERMISSION_MODES.some((mode) => mode === v)
+const isBudget = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0
+
+/** `undefined` is allowed (field omitted); any present value must pass `check`. */
+function optional<T>(
+  value: unknown,
+  check: (v: unknown) => v is T
+): { ok: true; value?: T } | null {
+  if (value === undefined) {
+    return { ok: true }
+  }
+  return check(value) ? { ok: true, value } : null
 }
 
-/** Strict shape check; a file that fails it is skipped with a warning rather than half-applied. */
+/**
+ * Strict shape check; a file that fails it is skipped with a warning rather than half-applied.
+ * Only known keys are copied, so unknown ones cannot ride along into launch files.
+ */
 export function parseCentralAgentProfile(value: unknown): ClaudeAgentProfile | null {
   if (!isPlainObject(value)) {
     return null
   }
-  const isString = (v: unknown): v is string => typeof v === 'string'
-  const isMcp = (v: unknown): v is Record<string, Record<string, unknown>> =>
-    isPlainObject(v) && Object.values(v).every(isPlainObject)
-  const isMode = (v: unknown): v is (typeof CLAUDE_PROFILE_PERMISSION_MODES)[number] =>
-    typeof v === 'string' && (CLAUDE_PROFILE_PERMISSION_MODES as readonly string[]).includes(v)
-  const isBudget = (v: unknown): v is number =>
-    typeof v === 'number' && Number.isFinite(v) && v >= 0
+  const { id, name } = value
+  if (typeof id !== 'string' || !isSafeAgentProfileId(id) || typeof name !== 'string') {
+    return null
+  }
+  if (!name.trim()) {
+    return null
+  }
+  const enabledPlugins = optional(value.enabledPlugins, isStringArray)
+  const pluginDirs = optional(value.pluginDirs, isStringArray)
+  const mcpServers = optional(value.mcpServers, isMcp)
+  const model = optional(value.model, isString)
+  const permissionMode = optional(value.permissionMode, isMode)
+  const allowedTools = optional(value.allowedTools, isStringArray)
+  const disallowedTools = optional(value.disallowedTools, isStringArray)
+  const appendSystemPrompt = optional(value.appendSystemPrompt, isString)
+  const maxBudgetUsd = optional(value.maxBudgetUsd, isBudget)
+  const defaultTask = optional(value.defaultTask, isString)
+  const accountId = optional(value.accountId, isString)
   if (
-    typeof value.id !== 'string' ||
-    !isSafeAgentProfileId(value.id) ||
-    typeof value.name !== 'string' ||
-    !value.name.trim() ||
-    !optionalOk(value.enabledPlugins, isStringArray) ||
-    !optionalOk(value.pluginDirs, isStringArray) ||
-    !optionalOk(value.mcpServers, isMcp) ||
-    !optionalOk(value.model, isString) ||
-    !optionalOk(value.permissionMode, isMode) ||
-    !optionalOk(value.allowedTools, isStringArray) ||
-    !optionalOk(value.disallowedTools, isStringArray) ||
-    !optionalOk(value.appendSystemPrompt, isString) ||
-    !optionalOk(value.maxBudgetUsd, isBudget) ||
-    !optionalOk(value.defaultTask, isString) ||
-    !optionalOk(value.accountId, isString)
+    !enabledPlugins ||
+    !pluginDirs ||
+    !mcpServers ||
+    !model ||
+    !permissionMode ||
+    !allowedTools ||
+    !disallowedTools ||
+    !appendSystemPrompt ||
+    !maxBudgetUsd ||
+    !defaultTask ||
+    !accountId
   ) {
     return null
   }
-  // Why a copy of known keys only: unknown keys must not ride along into launch files.
-  const known = [
-    'id',
-    'name',
-    'enabledPlugins',
-    'pluginDirs',
-    'mcpServers',
-    'model',
-    'permissionMode',
-    'allowedTools',
-    'disallowedTools',
-    'appendSystemPrompt',
-    'maxBudgetUsd',
-    'defaultTask',
-    'accountId'
-  ]
-  const profile: Record<string, unknown> = {}
-  for (const key of known) {
-    if (value[key] !== undefined) {
-      profile[key] = value[key]
-    }
+  return {
+    id,
+    name,
+    ...(enabledPlugins.value === undefined ? {} : { enabledPlugins: enabledPlugins.value }),
+    ...(pluginDirs.value === undefined ? {} : { pluginDirs: pluginDirs.value }),
+    ...(mcpServers.value === undefined ? {} : { mcpServers: mcpServers.value }),
+    ...(model.value === undefined ? {} : { model: model.value }),
+    ...(permissionMode.value === undefined ? {} : { permissionMode: permissionMode.value }),
+    ...(allowedTools.value === undefined ? {} : { allowedTools: allowedTools.value }),
+    ...(disallowedTools.value === undefined ? {} : { disallowedTools: disallowedTools.value }),
+    ...(appendSystemPrompt.value === undefined
+      ? {}
+      : { appendSystemPrompt: appendSystemPrompt.value }),
+    ...(maxBudgetUsd.value === undefined ? {} : { maxBudgetUsd: maxBudgetUsd.value }),
+    ...(defaultTask.value === undefined ? {} : { defaultTask: defaultTask.value }),
+    ...(accountId.value === undefined ? {} : { accountId: accountId.value })
   }
-  return profile as ClaudeAgentProfile
 }
 
 /**

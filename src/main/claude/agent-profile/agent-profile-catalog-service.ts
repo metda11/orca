@@ -25,7 +25,7 @@ function canonicalize(value: unknown): unknown {
   }
   if (typeof value === 'object' && value !== null) {
     return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>)
+      Object.entries(value)
         .filter(([, v]) => v !== undefined)
         .sort(([a], [b]) => (a < b ? -1 : 1))
         .map(([key, v]) => [key, canonicalize(v)])
