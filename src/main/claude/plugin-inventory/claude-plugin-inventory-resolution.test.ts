@@ -116,6 +116,52 @@ describe('resolveClaudePluginInventory', () => {
     expect(ids.map(([id]) => id)).not.toContain('only-project@m')
   })
 
+  it('marks a synced plugin off when any settings layer switches its id off', () => {
+    const base = sources()
+    const off = resolveClaudePluginInventory(
+      {
+        ...base,
+        settings: [
+          JSON.stringify({ enabledPlugins: { 'inno-learn@synced': true } }),
+          null,
+          JSON.stringify({ enabledPlugins: { 'inno-learn@synced': false } })
+        ]
+      },
+      '/work/repo',
+      posix
+    )
+    expect(off.find((p) => p.id === 'inno-learn@synced')?.enabled).toBe(false)
+    expect(off.find((p) => p.id === 'inno-core@synced')?.enabled).toBe(true)
+  })
+
+  it('points a directory-marketplace plugin at its source folder, not the cache copy', () => {
+    const marketplace = (source: unknown) => ({
+      name: 'local',
+      root: '/work/market',
+      manifest: JSON.stringify({ plugins: [{ name: 'tool', source }] })
+    })
+    const resolve = (source: unknown, other = true) =>
+      resolveClaudePluginInventory(
+        {
+          ...sources(),
+          installedPlugins: JSON.stringify({
+            version: 2,
+            plugins: { 'tool@local': [{ scope: 'user', installPath: `${cache}/local/tool/1.0.0` }] }
+          }),
+          directoryMarketplaces: other ? [marketplace(source)] : []
+        },
+        null,
+        posix
+      ).find((p) => p.id === 'tool@local')
+    expect(resolve('./plugins/tool')?.sourceFolder).toBe('/work/market/plugins/tool')
+    expect(resolve('./plugins/tool')?.installPath).toBe(`${cache}/local/tool/1.0.0`)
+    expect(resolve('./')?.sourceFolder).toBe('/work/market/')
+    expect(resolve('./plugins/tool', false)?.sourceFolder).toBeUndefined()
+    expect(resolve({ source: 'github', repo: 'a/b' })?.sourceFolder).toBeUndefined()
+    expect(resolve('./../escape')?.sourceFolder).toBeUndefined()
+    expect(resolve('/abs')?.sourceFolder).toBeUndefined()
+  })
+
   it('lists no synced plugins when the signed-in account is unknown', () => {
     const ids = resolveClaudePluginInventory({ ...sources(), globalConfig: '{}' }, null, posix).map(
       (p) => p.id

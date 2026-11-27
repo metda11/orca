@@ -6,6 +6,7 @@ Fork-specific changes on top of stablyai/orca. Format: [Keep a Changelog](https:
 
 ### Changed
 
+- Plugin inventory (`claudePlugins.inventory`): a plugin of a directory marketplace (`known_marketplaces.json`, `source: directory`) is now read from its source folder named in the marketplace's `marketplace.json` (`./<path>` entries), as `claude plugin list --json` reports it (`readFromFolder`), not from the install-cache copy; the cache copy stays the fallback. A synced plugin switched off in any settings layer (`enabledPlugins['<name>@synced']: false`) shows as disabled; confirmed against the CLI, with a test.
 - Automation precheck result: exit code `1` skips the run (`skipped_precheck`) and shows the first line the command printed as the reason; every other non-zero exit code, an error or a timeout now fails the run (`dispatch_failed`). Before, exit codes 2 and up were also recorded as skipped, so a broken precheck script now shows up as a failure instead of a quiet skip.
 - Run now and `orca automations run` run the precheck too (before, only scheduled runs did). Event runs still skip it.
 - A run of an automation on an existing workspace folder waits (stays queued) while another run on the same folder is starting or running, and starts when that run ends.

@@ -25,6 +25,8 @@ export type ClaudePluginInventorySources = {
   globalConfig: string | null
   /** `manifest.json` and folder names of the signed-in account's synced folder. */
   synced: { manifest: string | null; folders: readonly string[] } | null
+  /** Marketplaces added from a local folder (`source: directory`), with the `marketplace.json` found there. */
+  directoryMarketplaces?: readonly { name: string; root: string; manifest: string | null }[]
 }
 
 export type ResolvedClaudePlugin = {
@@ -35,6 +37,12 @@ export type ResolvedClaudePlugin = {
   scope: ClaudePluginInventoryScope
   enabled: boolean
   installPath: string
+  /**
+   * Where the CLI reads the plugin from when that is not `installPath`: a plugin of a directory
+   * marketplace runs from the marketplace's own folder, the cache copy is only the install record
+   * (`claude plugin list --json` `readFromFolder`, measured 2.1.x on 2026-11-27).
+   */
+  sourceFolder?: string
   version?: string
 }
 
@@ -113,6 +121,31 @@ function resolveSyncedPlugins(
   return plugins
 }
 
+// The plugin's folder inside a directory marketplace: its `marketplace.json` entry names it as a
+// relative `source` ("./name"); anything else (github, npm, absolute or escaping paths) has no local source.
+function directorySourceFolder(
+  sources: ClaudePluginInventorySources,
+  marketplace: string,
+  name: string,
+  pathApi: SkillDiscoveryPathApi
+): string | undefined {
+  const dir = sources.directoryMarketplaces?.find((entry) => entry.name === marketplace)
+  const plugins = parseJsonObject(dir?.manifest ?? null)?.plugins
+  if (!dir || !Array.isArray(plugins)) {
+    return undefined
+  }
+  const entry = plugins.map(asRecord).find((candidate) => candidate?.name === name)
+  const source = entry?.source
+  if (typeof source !== 'string' || !source.startsWith('./')) {
+    return undefined
+  }
+  const folder = pathApi.join(dir.root, source)
+  const rel = pathApi.relative(dir.root, folder)
+  return rel === '..' || rel.startsWith(`..${pathApi.sep}`) || pathApi.isAbsolute(rel)
+    ? undefined
+    : folder
+}
+
 /** Every plugin installed for the account, with the install a session in `cwd` would load; null cwd: user scope only. */
 export function resolveClaudePluginInventory(
   sources: ClaudePluginInventorySources,
@@ -135,13 +168,17 @@ export function resolveClaudePluginInventory(
         continue
       }
       const at = id.lastIndexOf('@')
+      const name = at > 0 ? id.slice(0, at) : id
+      const marketplace = at > 0 ? id.slice(at + 1) : ''
+      const sourceFolder = directorySourceFolder(sources, marketplace, name, pathApi)
       plugins.push({
         id,
-        name: at > 0 ? id.slice(0, at) : id,
-        marketplace: at > 0 ? id.slice(at + 1) : '',
+        name,
+        marketplace,
         scope: install.scope,
         enabled: enabled.get(id) === true,
         installPath: install.installPath,
+        ...(sourceFolder ? { sourceFolder } : {}),
         ...(install.version ? { version: install.version } : {})
       })
     }
