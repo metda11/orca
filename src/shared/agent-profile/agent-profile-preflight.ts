@@ -38,7 +38,8 @@ export type AgentProfilePreflightInputs = {
   agentName?: string
   /** Only whether a variable is set; the value never enters the preflight. */
   isEnvSet: (name: string) => boolean
-  pathExists: (path: string) => boolean
+  /** The paths from `profilePathsToCheck` that exist; read ahead so the check itself stays synchronous. */
+  existingPaths: ReadonlySet<string>
   /** Managed settings `disableSideloadFlags` is on for this machine. */
   sideloadDisabled: boolean
 }
@@ -115,7 +116,7 @@ function pluginFindings(
     }
   }
   for (const dir of profile.pluginDirs ?? []) {
-    if (!inputs.pathExists(dir)) {
+    if (!inputs.existingPaths.has(dir)) {
       findings.push({
         code: 'plugin_dir_missing',
         severity: 'error',
@@ -125,6 +126,25 @@ function pluginFindings(
     }
   }
   return findings
+}
+
+function mcpScriptPaths(server: Record<string, unknown>): string[] {
+  const command = typeof server.command === 'string' ? server.command : ''
+  const args = Array.isArray(server.args)
+    ? server.args.filter((arg): arg is string => typeof arg === 'string')
+    : []
+  return [
+    ...(command && (hasPathSeparator(command) || command.startsWith('.')) ? [command] : []),
+    ...args.filter((arg) => !arg.startsWith('-') && SCRIPT_FILE.test(arg))
+  ].filter((script) => !script.includes('${'))
+}
+
+/** The files and folders a profile names; the host checks which exist and passes them as `existingPaths`. */
+export function profilePathsToCheck(profile: ClaudeAgentProfile): string[] {
+  return [
+    ...(profile.pluginDirs ?? []),
+    ...Object.values(profile.mcpServers ?? {}).flatMap(mcpScriptPaths)
+  ]
 }
 
 function mcpServerFindings(
@@ -165,15 +185,9 @@ function mcpServerFindings(
       }
     }
   }
-  const args = Array.isArray(server.args)
-    ? server.args.filter((arg): arg is string => typeof arg === 'string')
-    : []
-  const scripts = [
-    ...(command && (hasPathSeparator(command) || command.startsWith('.')) ? [command] : []),
-    ...args.filter((arg) => !arg.startsWith('-') && SCRIPT_FILE.test(arg))
-  ]
+  const scripts = mcpScriptPaths(server)
   for (const script of scripts) {
-    if (!script.includes('${') && !inputs.pathExists(script)) {
+    if (!inputs.existingPaths.has(script)) {
       findings.push({
         code: 'mcp_script_missing',
         severity: 'error',

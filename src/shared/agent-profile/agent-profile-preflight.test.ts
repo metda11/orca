@@ -32,7 +32,7 @@ describe('evaluateClaudeProfilePreflight', () => {
         workspaceMcpServers: [],
         folderAgents: [],
         isEnvSet: () => true,
-        pathExists: () => true,
+        existingPaths: new Set(),
         sideloadDisabled: false
       }
     )

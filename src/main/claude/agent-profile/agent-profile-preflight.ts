@@ -1,10 +1,10 @@
-import { existsSync } from 'node:fs'
-import { readFile, readdir } from 'node:fs/promises'
+import { readFile, readdir, stat } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { dirname, isAbsolute, join, resolve } from 'node:path'
 import type { ClaudeAgentProfile } from '../../../shared/agent-profile/agent-profile-types'
 import {
   evaluateClaudeProfilePreflight,
+  profilePathsToCheck,
   type AgentProfilePreflightFinding,
   type AgentProfilePreflightInputs
 } from '../../../shared/agent-profile/agent-profile-preflight'
@@ -47,11 +47,20 @@ async function folderAgents(cwd: string | null, configDir: string): Promise<stri
   return (await Promise.all(dirs.map(agentNamesIn))).flat()
 }
 
-function pathExistsFrom(cwd: string | null): (path: string) => boolean {
-  return (path) => {
-    const expanded = path.startsWith('~') ? join(homedir(), path.slice(1)) : path
-    return existsSync(isAbsolute(expanded) ? expanded : resolve(cwd ?? process.cwd(), expanded))
-  }
+async function existingPathsOf(paths: readonly string[], cwd: string | null): Promise<Set<string>> {
+  const found = await Promise.all(
+    paths.map(async (path) => {
+      const expanded = path.startsWith('~') ? join(homedir(), path.slice(1)) : path
+      const absolute = isAbsolute(expanded) ? expanded : resolve(cwd ?? process.cwd(), expanded)
+      return (await stat(absolute).then(
+        () => true,
+        () => false
+      ))
+        ? path
+        : null
+    })
+  )
+  return new Set(found.filter((path): path is string => path !== null))
 }
 
 /**
@@ -89,7 +98,7 @@ export async function runClaudeProfilePreflight(args: {
       args.agentName && inventory ? await folderAgents(args.cwd, inventory.configDir) : [],
     ...(args.agentName ? { agentName: args.agentName } : {}),
     isEnvSet: (name) => Boolean(env[name]),
-    pathExists: pathExistsFrom(args.cwd),
+    existingPaths: await existingPathsOf(profilePathsToCheck(args.profile), args.cwd),
     sideloadDisabled
   }
   return evaluateClaudeProfilePreflight(args.profile, inputs)
