@@ -58,6 +58,7 @@ export function createWebAppApi(): Partial<PreloadApi> {
       // The web client has no local userData, so profile starts are refused there.
       getAgentProfileRoot: () => Promise.resolve(''),
       preflightAgentProfile: () => Promise.resolve([]),
+      getAgentProfilePaneBindings: () => Promise.resolve({}),
       getAgentProfileCatalog: () => Promise.resolve({ entries: [], warnings: [] }),
       resetDefaultAgentProfile: () => Promise.resolve({ ok: false, reason: 'unknown_default' }),
       getFloatingMarkdownDirectory: () => Promise.resolve(''),

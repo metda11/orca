@@ -1,4 +1,5 @@
 import { TerminalPaneRecentImages } from './TerminalRecentImages'
+import { TerminalPaneProfileChip } from './TerminalPaneProfileChip'
 import { useAppStore } from '@/store'
 import type { PaneTitleOverlayRect } from './pane-title-overlay-rects'
 import { ImeInput } from '@/lib/text-input/ime/ime-text-field'
@@ -205,6 +206,7 @@ export default function TerminalPaneHeaderOverlay({
                   }}
                 />
               )}
+              <TerminalPaneProfileChip paneKey={makePaneKey(tabId, pane.leafId)} />
               {showAlwaysOnHeaders && !(isActivePane && canShowTerminal) && chips}
             </div>
             <div className="pane-title-actions flex shrink-0 items-center">
