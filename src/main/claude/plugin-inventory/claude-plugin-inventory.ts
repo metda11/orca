@@ -1,6 +1,5 @@
 // The Claude plugin inventory of one account and workspace: each installed plugin with what it
 // brings. Read from config files and plugin folders, never the CLI, so it is cheap and works on any host.
-import { existsSync } from 'node:fs'
 import { readdir, stat } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join, resolve } from 'node:path'
@@ -48,12 +47,20 @@ async function readSources(
   explicit: boolean,
   cwd: string | null
 ): Promise<ClaudePluginInventorySources> {
-  const globalConfigFile = resolveClaudeGlobalConfigFile({
-    env: explicit ? { CLAUDE_CONFIG_DIR: configDir } : {},
-    homeDir: homedir(),
-    style: process.platform === 'win32' ? 'win32' : 'posix',
-    exists: existsSync
-  })
+  const resolveGlobalConfigFile = (exists: (path: string) => boolean) =>
+    resolveClaudeGlobalConfigFile({
+      env: explicit ? { CLAUDE_CONFIG_DIR: configDir } : {},
+      homeDir: homedir(),
+      style: process.platform === 'win32' ? 'win32' : 'posix',
+      exists
+    })
+  // The only file the resolver probes is the legacy `.config.json`; check it without blocking main.
+  const legacyFile = resolveGlobalConfigFile(() => true)
+  const legacyExists = await stat(legacyFile).then(
+    (entry) => entry.isFile(),
+    () => false
+  )
+  const globalConfigFile = resolveGlobalConfigFile((path) => path === legacyFile && legacyExists)
   const [installedPlugins, globalConfig, ...settings] = await Promise.all([
     readPluginMetadataFile(join(configDir, 'plugins', 'installed_plugins.json')),
     readPluginMetadataFile(globalConfigFile),

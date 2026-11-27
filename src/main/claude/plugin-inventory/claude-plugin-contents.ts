@@ -49,7 +49,9 @@ function manifestPaths(root: string, value: unknown): string[] {
 }
 
 function frontmatterName(text: string | null): string | null {
-  const block = text?.match(/^﻿?---\r?\n([\s\S]*?)\r?\n---/)?.[1]
+  // Claude writes no BOM, but an editor may; compare by code so the bundle stays ASCII.
+  const body = text?.charCodeAt(0) === 0xfeff ? text.slice(1) : text
+  const block = body?.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1]
   const name = block?.match(/^name:\s*["']?([^"'\r\n]+?)["']?\s*$/m)?.[1]?.trim()
   return name || null
 }

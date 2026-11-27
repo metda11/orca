@@ -1,3 +1,4 @@
+import { isAbsolute } from 'node:path'
 import { defineMethod } from '../../core'
 import { ClaudePluginInventoryParams } from '../../../../../shared/rpc-contract/claude-plugins/claude-plugin-inventory-params'
 import { parseExecutionHostId } from '../../../../../shared/execution-host/execution-host'
@@ -19,12 +20,19 @@ export const CLAUDE_PLUGIN_METHODS = [
         }
         cwd = target.worktree.path
       }
+      const accountHomePath = params.accountHomePath?.trim() || null
+      if ((cwd && !isAbsolute(cwd)) || (accountHomePath && !isAbsolute(accountHomePath))) {
+        throw new Error('The Claude plugin inventory needs absolute folders.')
+      }
       // A WSL workspace runs Claude with the distro's own config folder, which this read does not reach yet.
-      if (cwd && wslDistroForPath(cwd)) {
+      if (
+        (cwd && wslDistroForPath(cwd)) ||
+        (accountHomePath && wslDistroForPath(accountHomePath))
+      ) {
         throw new Error('The Claude plugin inventory is unavailable for WSL workspaces.')
       }
       return readClaudePluginInventory({
-        accountHomePath: params.accountHomePath ?? null,
+        accountHomePath,
         cwd,
         refresh: params.refresh === true
       })

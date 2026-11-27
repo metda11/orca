@@ -103,7 +103,8 @@ function resolveSyncedPlugins(
       name,
       marketplace: SYNCED_MARKETPLACE,
       scope: 'synced',
-      // Org-synced plugins load unless switched off; `claude plugin list` shows them enabled with no setting.
+      // The manifest lists what is installed for the account (`required` and `available` alike); the CLI
+      // loads each unless `enabledPlugins` switches its id off (ClaudeFleetManager workstation.js, measured 2026-09-23).
       enabled: enabled.get(id) !== false,
       // No version: the manifest's is the sync's counter; the CLI shows the folder's plugin.json version.
       installPath: pathApi.join(sources.configDir, 'plugins', 'synced', accountFolder, folder)
@@ -152,7 +153,7 @@ export function resolveClaudePluginInventory(
   ].sort((a, b) => a.id.localeCompare(b.id))
 }
 
-/** Declared dependency names → ids as the CLI resolves them: a bare name means the plugin's own marketplace. */
+/** Declared dependency names -> ids as the CLI resolves them: a bare name means the plugin's own marketplace. */
 export function qualifyClaudePluginDependencies(declared: unknown, marketplace: string): string[] {
   const values = Array.isArray(declared) ? declared : declared == null ? [] : [declared]
   return values.flatMap((value) => {
