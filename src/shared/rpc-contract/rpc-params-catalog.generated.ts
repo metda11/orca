@@ -349,6 +349,7 @@ import {
   ScreencastUnsubscribe
 } from './browser/browser-screencast-params'
 import { BrowserOpenUrlParams, BrowserTabCreateParams } from './browser/browser-tab-create-params'
+import { ClaudePluginInventoryParams } from './claude-plugins/claude-plugin-inventory-params'
 import {
   ClientEventsSubscribeParams,
   ClientEventsUnsubscribeParams
@@ -1560,6 +1561,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'browser.viewport': Viewport,
   'browser.wait': Wait,
   'browser.zoom': PageZoom,
+  'claudePlugins.inventory': ClaudePluginInventoryParams,
   'clipboard.abortImageUpload': AbortImageUpload,
   'clipboard.appendImageUploadChunk': AppendImageUploadChunk,
   'clipboard.commitImageUpload': CommitImageUpload,

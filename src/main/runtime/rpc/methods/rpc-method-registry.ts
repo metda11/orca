@@ -68,6 +68,7 @@ import { PLUGIN_DEV_EMIT_METHODS } from './plugins/plugin-dev-emit'
 import { PLUGIN_DEV_REQUEST_METHODS } from './plugins/plugin-dev-request'
 import { PLUGIN_INSTALL_METHODS } from './plugins/plugin-install-methods'
 import { SKILL_METHODS } from './skills/skills'
+import { CLAUDE_PLUGIN_METHODS } from './claude-plugins/claude-plugin-inventory'
 import { CLIPBOARD_METHODS } from './clipboard/clipboard'
 import { HOST_CAPABILITY_METHODS } from './host-management/host-capabilities'
 import { MOBILE_WEB_BUNDLE_METHODS } from './mobile-delivery/mobile-web-bundle'
@@ -257,6 +258,7 @@ const SERVICE_RPC_METHODS = [
   ...PLUGIN_DEV_REQUEST_METHODS,
   ...PLUGIN_INSTALL_METHODS,
   ...SKILL_METHODS,
+  ...CLAUDE_PLUGIN_METHODS,
   ...CLIPBOARD_METHODS,
   ...HOST_CAPABILITY_METHODS,
   ...MOBILE_WEB_BUNDLE_METHODS,

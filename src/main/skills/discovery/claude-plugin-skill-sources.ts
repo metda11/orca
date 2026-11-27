@@ -14,10 +14,11 @@ export type ClaudePluginMetadata = {
   settings: (string | null)[]
 }
 
-type ClaudePluginInstall = {
+export type ClaudePluginInstall = {
   scope: 'user' | 'project' | 'local'
   installPath: string
   projectPath?: string
+  version?: string
   installedAt?: string
   lastUpdated?: string
 }
@@ -40,7 +41,9 @@ export function getClaudePluginMetadataPaths(
   }
 }
 
-function readEnabledPlugins(settingsContents: readonly (string | null)[]): Map<string, boolean> {
+export function readEnabledPlugins(
+  settingsContents: readonly (string | null)[]
+): Map<string, boolean> {
   const enabled = new Map<string, boolean>()
   for (const content of settingsContents) {
     const settings = parseJsonObject(content)
@@ -72,6 +75,7 @@ function parseInstall(value: unknown): ClaudePluginInstall | null {
     scope: record.scope,
     installPath: record.installPath,
     ...(typeof record.projectPath === 'string' ? { projectPath: record.projectPath } : {}),
+    ...(typeof record.version === 'string' ? { version: record.version } : {}),
     ...(typeof record.installedAt === 'string' ? { installedAt: record.installedAt } : {}),
     ...(typeof record.lastUpdated === 'string' ? { lastUpdated: record.lastUpdated } : {})
   }
@@ -106,7 +110,7 @@ function installTimestamp(install: ClaudePluginInstall): number {
   return Number.isFinite(timestamp) ? timestamp : 0
 }
 
-function selectActiveInstall(
+export function selectActiveInstall(
   values: unknown[],
   cwd: string,
   pathApi: SkillDiscoveryPathApi
