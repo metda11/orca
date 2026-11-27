@@ -8,6 +8,17 @@ const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(
  * arrive first on a loaded machine and cancel the pick instead of selecting.
  */
 export async function hoverForPick(page: WebContents, point: { x: number; y: number }) {
+  // A guest in a hidden window composites about once a second, so the two frames below would
+  // take two seconds. A frame subscription makes Chromium treat the page as captured and render at full rate.
+  page.beginFrameSubscription(() => {})
+  try {
+    await hoverUnderCapture(page, point)
+  } finally {
+    page.endFrameSubscription()
+  }
+}
+
+async function hoverUnderCapture(page: WebContents, point: { x: number; y: number }) {
   const before: number = await page.executeJavaScript(`(() => {
     if (window.__fixtureMoves === undefined) {
       window.__fixtureMoves = 0;
