@@ -43,6 +43,7 @@ import {
   getSourceContextFlag,
   getWorkspaceModeFlag
 } from './automation-handler-flags'
+import { getAgentProfileFlag } from './automation-agent-profile-flag'
 import { getExtraAgentArgsFlag } from './automation-extra-agent-args-flag'
 import { assertAutomationFieldsSupported } from './automation-host-support'
 import { assertAutomationSetupMode, getAutomationSetupFlag } from './automation-setup-flag'
@@ -147,6 +148,8 @@ export const AUTOMATION_HANDLERS: Record<string, CommandHandler> = {
       precheck: getPrecheckFlag(flags),
       agentId: getProviderFlag(flags),
       extraAgentArgs: getExtraAgentArgsFlag(flags),
+      // A create has nothing to clear, so an empty value saves no profile.
+      agentProfileId: getAgentProfileFlag(flags) ?? undefined,
       ...(setupDecision !== undefined ? { setupDecision } : {}),
       ...(target.runContext ? { runContext: target.runContext } : {}),
       ...(sourceContext !== undefined ? { sourceContext } : {}),
@@ -199,6 +202,7 @@ export const AUTOMATION_HANDLERS: Record<string, CommandHandler> = {
       precheck: getPrecheckFlag(flags),
       agentId: getOptionalProviderFlag(flags),
       extraAgentArgs: getExtraAgentArgsFlag(flags),
+      agentProfileId: getAgentProfileFlag(flags),
       ...(setupDecision !== undefined ? { setupDecision } : {}),
       ...(target.runContext ? { runContext: target.runContext } : {}),
       ...(sourceContext !== undefined ? { sourceContext } : {}),

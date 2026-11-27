@@ -2,25 +2,12 @@ import type { TuiAgent } from '../../../../../../shared/agent-launch/catalog/tui
 import {
   AgentProfileLaunchError,
   findClaudeAgentProfile,
-  type AgentProfileLaunchRequest,
-  type AgentProfileRefusal
+  type AgentProfileLaunchRequest
 } from '../../../../../../shared/agent-profile/claude-profile-startup-args'
 import { isSafeAgentProfileId } from '../../../../../../shared/agent-profile/claude-profile-files'
 import type { ClaudeAgentProfile } from '../../../../../../shared/agent-profile/agent-profile-types'
+import { AGENT_PROFILE_REFUSAL_MESSAGES } from '../../../../../../shared/agent-profile/agent-profile-refusal-copy'
 import { readAgentProfileRoot } from './agent-profile-root'
-
-const REFUSAL_MESSAGES: Record<
-  AgentProfileRefusal | 'agent_profile_id_invalid' | 'agent_profile_preflight_failed',
-  string
-> = {
-  agent_profile_agent_unsupported: 'Agent profiles only apply to Claude.',
-  agent_profile_host_unsupported:
-    'Agent profiles only start on this computer, not on a remote host, WSL or the web client.',
-  agent_profile_unknown: 'The agent profile no longer exists.',
-  agent_profile_account_unsupported: 'Agent profiles with a Claude account cannot start yet.',
-  agent_profile_id_invalid: 'The agent profile id is invalid.',
-  agent_profile_preflight_failed: 'The agent profile failed its preflight check.'
-}
 
 export type AgentProfileLaunchResolution =
   | { ok: true; request: AgentProfileLaunchRequest }
@@ -34,9 +21,11 @@ export function resolveAgentProfileLaunchRequest(args: {
   /** Remote, WSL or web-hosted: anywhere main's userData is not what the agent reads. */
   hostIsLocal: boolean
 }): AgentProfileLaunchResolution {
-  const refuse = (code: keyof typeof REFUSAL_MESSAGES): AgentProfileLaunchResolution => ({
+  const refuse = (
+    code: keyof typeof AGENT_PROFILE_REFUSAL_MESSAGES
+  ): AgentProfileLaunchResolution => ({
     ok: false,
-    message: REFUSAL_MESSAGES[code]
+    message: AGENT_PROFILE_REFUSAL_MESSAGES[code]
   })
   if (args.agent !== 'claude') {
     return refuse('agent_profile_agent_unsupported')

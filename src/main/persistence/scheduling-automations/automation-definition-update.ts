@@ -12,6 +12,7 @@ import type {
   AutomationUpdateInput
 } from '../../../shared/automations/automation-definition'
 import { normalizeAutomationPrecheck } from '../../../shared/automations/launch/automation-precheck'
+import { assertAutomationAgentProfile } from '../../../shared/automations/launch/automation-agent-profile'
 import { assertAutomationExtraAgentArgs } from '../../../shared/automations/launch/automation-extra-agent-args-record'
 import { settleAutomationTriggers } from '../../webhooks/webhook-rule-check'
 import {
@@ -157,6 +158,9 @@ export function mergeAutomationUpdate(
     precheck: Object.hasOwn(definedUpdates, 'precheck')
       ? normalizeAutomationPrecheck(definedUpdates.precheck)
       : normalizeAutomationPrecheck(current.precheck),
+    agentProfileId: Object.hasOwn(definedUpdates, 'agentProfileId')
+      ? (definedUpdates.agentProfileId ?? undefined)
+      : current.agentProfileId,
     projectId: repoId,
     // Why the wire object is ignored: contexts are the storing authority's own
     // registry speaking. A move restates them from that registry, anything else
@@ -213,7 +217,11 @@ export function mergeAutomationUpdate(
     delete merged[key]
   }
   Object.assign(merged, automationCanonicalLaunchSetup(launchSetupUpdate))
+  if (!merged.agentProfileId) {
+    delete merged.agentProfileId
+  }
   assertAutomationExtraAgentArgs(merged)
+  assertAutomationAgentProfile(merged)
   settleAutomationTriggers(merged)
   const previousPin = automationWorkspaceSshPin(operations.state, current.workspaceId)
   const workspaceSshPin = automationWorkspaceSshPin(operations.state, merged.workspaceId)

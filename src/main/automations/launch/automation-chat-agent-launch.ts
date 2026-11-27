@@ -4,6 +4,8 @@ import type { Automation } from '../../../shared/automations/automation-definiti
 import type { AutomationRun } from '../../../shared/automations/history/automation-run'
 import type { OrcaRuntimeService } from '../../runtime/orca-runtime'
 import { launchAgentOnHost } from '../../runtime/rpc/methods/agent-launch/agent-launch'
+import { AUTOMATION_PROFILE_TERMINAL_ONLY } from '../../../shared/automations/launch/automation-agent-profile'
+import { automationAgentProfileRefusal } from './automation-agent-profile-launch'
 import { reuseAutomationChat } from './automation-chat-session-reuse'
 import { buildHeadlessAutomationWorkspaceName } from './automation-workspace-create'
 import type { AutomationRepoRunTarget } from '../ownership/run-target-resolution'
@@ -32,6 +34,10 @@ export async function launchAutomationChatAgent(
   runtime: OrcaRuntimeService,
   request: AutomationChatLaunchRequest
 ): Promise<AutomationChatAgentLaunch> {
+  // Why: a chat start carries no profile files, so it would run with less than configured.
+  if (request.automation.agentProfileId) {
+    throw automationAgentProfileRefusal(AUTOMATION_PROFILE_TERMINAL_ONLY)
+  }
   try {
     return await enrichAutomationRunTarget(runtime, await launchChat(runtime, request))
   } catch (error) {

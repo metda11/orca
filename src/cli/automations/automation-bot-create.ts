@@ -58,7 +58,8 @@ const NOT_WITH_BOT_REFUSALS: Record<string, string> = {
   provider:
     '--provider cannot be used with --bot; use --agent <agent> (with --model/--effort) to run this automation on another agent.',
   'extra-agent-args':
-    "A bot's runs are chats and take no agent arguments; use --model and --effort."
+    "A bot's runs are chats and take no agent arguments; use --model and --effort.",
+  'agent-profile': "A bot's runs are chats and take no agent profile."
 }
 
 /** --agent, --model and --effort on a bot's automation; `--agent bot` goes back to the bot's own. */

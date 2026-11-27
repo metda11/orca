@@ -10,6 +10,7 @@ import type {
   WorkspaceAttachment,
   Worktree
 } from '../../../../shared/worktree/types'
+import type { AgentProfileLaunchRequest } from '../../../../shared/agent-profile/claude-profile-startup-args'
 import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
 import type { WorkspaceSource as WorkspaceCreateTelemetrySource } from '../../../../shared/workspace/creation/workspace-source'
 import type { WorktreeStartupLaunch } from '../../../../shared/worktree/creation/launch-types'
@@ -86,6 +87,8 @@ export type RuntimeManagedWorktreeCreateArgs = {
   startupAgentArgs?: string | null
   /** Main-internal: an automation's saved extras, merged over the startup agent's arguments. */
   startupExtraAgentArgs?: string
+  /** Main-internal: a saved Claude loadout whose files the caller already wrote. */
+  startupAgentProfile?: AgentProfileLaunchRequest
   /** Main-internal: Orca, not a user, types into the startup agent once it starts. */
   startupSuppressUpdatePrompt?: boolean
   /** Main-internal: the startup terminal's tab title, such as an automation run's. */

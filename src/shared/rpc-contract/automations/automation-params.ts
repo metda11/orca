@@ -15,6 +15,7 @@ import {
   requiredNumber,
   requiredString
 } from '../rpc-param-primitives'
+import { isSafeAgentProfileId } from '../../agent-profile/claude-profile-files'
 import { refuseUnknownNamedZone } from './automation-timezone-param'
 import {
   AutomationPrecheck,
@@ -34,6 +35,12 @@ export * from './automation-selector-params'
 // Why strict: null or a non-string must fail rather than fall back to "omitted", which preserves.
 const ExtraAgentArgs = lazyZodSchema(() =>
   z.string({ message: 'Extra agent arguments must be text.' }).optional()
+)
+
+const AgentProfileId = lazyZodSchema(() =>
+  z
+    .string({ message: 'The agent profile id must be text.' })
+    .refine(isSafeAgentProfileId, { message: 'The agent profile id is invalid.' })
 )
 
 export const AutomationCanonicalLaunchSetup = lazyZodSchema(() =>
@@ -111,6 +118,7 @@ export const AutomationCreate = lazyZodSchema(() =>
       precheck: AutomationPrecheck,
       agentId: TuiAgent,
       extraAgentArgs: ExtraAgentArgs,
+      agentProfileId: AgentProfileId.optional(),
       launchSetupPatch: AutomationLaunchSetupPatch.optional(),
       runContext: WorkspaceRunContext,
       sourceContext: TaskSourceContext,
@@ -149,6 +157,8 @@ export const AutomationUpdateFields = lazyZodSchema(() =>
       precheck: AutomationPrecheck,
       agentId: TuiAgent.optional(),
       extraAgentArgs: ExtraAgentArgs,
+      // Why: null clears the saved profile; omitted keeps it.
+      agentProfileId: AgentProfileId.nullable().optional(),
       launchSetupPatch: AutomationLaunchSetupPatch.optional(),
       runContext: WorkspaceRunContext,
       sourceContext: TaskSourceContext,

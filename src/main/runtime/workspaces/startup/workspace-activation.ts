@@ -7,6 +7,7 @@ import {
 } from '../../../../shared/remote-runtime/session-graph/runtime-navigation'
 import { getRepoExecutionHostId } from '../../../../shared/execution-host/execution-host'
 import { phoneWakeReport } from '../../../../shared/workspace/lifecycle/workspace-sleep'
+import type { AgentProfileLaunchRequest } from '../../../../shared/agent-profile/claude-profile-startup-args'
 import type { Repo } from '../../../../shared/repository/repo-types'
 import type { TerminalWorkspaceLaunchScope } from '../../orchestration/terminal-authority/structured-sessions/runtime-legacy-worker-terminal-recovery-types'
 import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
@@ -176,6 +177,7 @@ export abstract class OrcaRuntimeWithActivateManagedWorktree extends OrcaRuntime
       agentArgs?: string | null
       sessionOptions?: Parameters<typeof buildWorktreeStartupForAgent>[0]['sessionOptions']
       extraAgentArgs?: string
+      agentProfile?: AgentProfileLaunchRequest
       suppressStartupUpdatePrompt?: boolean
       launchSource?: string
       onPromptCarry?: (carried: boolean) => void
@@ -194,6 +196,7 @@ export abstract class OrcaRuntimeWithActivateManagedWorktree extends OrcaRuntime
       ...(launchInputs?.agentArgs !== undefined ? { agentArgs: launchInputs.agentArgs } : {}),
       ...(launchInputs?.sessionOptions ? { sessionOptions: launchInputs.sessionOptions } : {}),
       ...(launchInputs?.extraAgentArgs ? { extraAgentArgs: launchInputs.extraAgentArgs } : {}),
+      ...(launchInputs?.agentProfile ? { agentProfile: launchInputs.agentProfile } : {}),
       ...(launchInputs?.suppressStartupUpdatePrompt ? { suppressStartupUpdatePrompt: true } : {}),
       ...(launchInputs?.launchSource ? { launchSource: launchInputs.launchSource } : {}),
       ...(launchInputs?.onPromptCarry ? { onPromptCarry: launchInputs.onPromptCarry } : {}),

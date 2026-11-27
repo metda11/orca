@@ -4,6 +4,7 @@ import type { SessionOptionValue } from '../../../../shared/native-chat/input/na
 import { agentStartedTelemetry } from '../../../agent-launch/agent-started-telemetry'
 import type { AgentLaunchPreferences } from '../../../../shared/agent-session/lifecycle/operations/agent-session-host-authority'
 import type { Repo } from '../../../../shared/repository/repo-types'
+import type { AgentProfileLaunchRequest } from '../../../../shared/agent-profile/claude-profile-startup-args'
 import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
 import type { WorktreeStartupLaunch } from '../../../../shared/worktree/creation/launch-types'
 import { repoIsRemote } from '../../../../shared/agent-launch/startup/agent-launch-remote'
@@ -25,6 +26,7 @@ import {
   launchHostProvesAgentInFront,
   nameLocalTypedLineShell
 } from '../../terminal/launch/agent-launch-typed-line-shell'
+import { assertAgentProfileHostIsLocal } from '../../../claude/agent-profile/agent-profile-host-check'
 import { detectAgentsOnHost } from '../../../preflight/workspace-agent-detection'
 import { agentCommandOverrideDetectionOptions } from '../../../preflight/installed-agent-detection'
 import type { RuntimeStore } from '../../construction/runtime-store-contract'
@@ -48,6 +50,7 @@ type StartupEnvironment = {
   /** An automation's saved extras, merged over the launch's arguments. */
   sessionOptions?: Readonly<Record<string, SessionOptionValue>>
   extraAgentArgs?: string
+  agentProfile?: AgentProfileLaunchRequest
   /** Orca, not a user, types into this agent once it starts. */
   suppressStartupUpdatePrompt?: boolean
   /** Caller-supplied telemetry attribution, validated leniently at the host boundary. */
@@ -193,6 +196,9 @@ export async function buildWorktreeStartupForAgent(
     throw new Error('Selected agent is disabled. Choose an enabled agent before creating.')
   }
   const { platform, shell, launchRuntime } = environment.getLaunchRuntime(agent)
+  if (environment.agentProfile) {
+    assertAgentProfileHostIsLocal({ cwd: repo.path, runtime: launchRuntime })
+  }
   const resolvedInputs = resolveAgentStartupPlanInputs({
     agent,
     settings,
@@ -201,6 +207,7 @@ export async function buildWorktreeStartupForAgent(
     isRemote: repoIsRemote(repo),
     ...(environment.agentArgs !== undefined ? { agentArgs: environment.agentArgs } : {}),
     ...(environment.extraAgentArgs ? { extraAgentArgs: environment.extraAgentArgs } : {}),
+    ...(environment.agentProfile ? { agentProfile: environment.agentProfile } : {}),
     ...(environment.suppressStartupUpdatePrompt ? { suppressStartupUpdatePrompt: true } : {}),
     sessionOptions:
       environment.sessionOptions ?? environment.toSessionOptions(environment.launchPreferences)
@@ -266,6 +273,7 @@ export async function resolveWorktreeCreateAgentStartup(
       agentArgs?: string | null
       sessionOptions?: Readonly<Record<string, SessionOptionValue>>
       extraAgentArgs?: string
+      agentProfile?: AgentProfileLaunchRequest
       suppressStartupUpdatePrompt?: boolean
       launchSource?: string
       onPromptCarry?: (carried: boolean) => void
@@ -291,6 +299,7 @@ export async function resolveWorktreeCreateAgentStartup(
     ...(args.startupAgentArgs !== undefined ? { agentArgs: args.startupAgentArgs } : {}),
     ...(args.startupSessionOptions ? { sessionOptions: args.startupSessionOptions } : {}),
     ...(args.startupExtraAgentArgs ? { extraAgentArgs: args.startupExtraAgentArgs } : {}),
+    ...(args.startupAgentProfile ? { agentProfile: args.startupAgentProfile } : {}),
     ...(args.startupSuppressUpdatePrompt ? { suppressStartupUpdatePrompt: true } : {}),
     ...(args.startupLaunchSource ? { launchSource: args.startupLaunchSource } : {}),
     ...(args.onStartupPromptCarry ? { onPromptCarry: args.onStartupPromptCarry } : {})

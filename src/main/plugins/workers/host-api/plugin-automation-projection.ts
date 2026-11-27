@@ -43,6 +43,7 @@ export const automationAnswer = lazyZodSchema(() =>
     precheck: z.object({ command: z.string() }).nullable().optional(),
     agentArgs: z.string().nullable().optional(),
     extraAgentArgs: z.string().optional(),
+    agentProfileId: z.string().optional(),
     launchPreferences: z.record(z.string(), z.unknown()).optional()
   })
 )
@@ -60,12 +61,13 @@ export function pluginOwnsAutomation(
 }
 
 /** Runs start the agent with more than the person's defaults: arguments, launch choices such as a
- *  permission mode, or a precheck command. Only the person can set these. */
+ *  permission mode, an agent profile, or a precheck command. Only the person can set these. */
 export function automationRunsElevated(automation: PluginAutomationRecord): boolean {
   return Boolean(
     automation.precheck ||
     automation.agentArgs ||
     automation.extraAgentArgs?.trim() ||
+    automation.agentProfileId ||
     Object.keys(automation.launchPreferences ?? {}).length > 0
   )
 }

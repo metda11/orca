@@ -1,4 +1,5 @@
 import { agentPromptRidesLaunchCommand } from '../../../../shared/agent-launch/startup/tui-agent-startup'
+import type { AgentProfileLaunchRequest } from '../../../../shared/agent-profile/claude-profile-startup-args'
 import type { SessionOptionValue } from '../../../../shared/native-chat/input/native-chat-session-options'
 import type { TerminalWorkspaceCreationEvidence } from './terminal-workspace-scope'
 import type { FolderWorkspace } from '../../../../shared/folder-workspaces/folder-workspace-types'
@@ -190,6 +191,7 @@ export abstract class OrcaRuntimeWithTerminalCreateDeduplication extends OrcaRun
       agentArgs?: string | null
       sessionOptions?: Readonly<Record<string, SessionOptionValue>>
       extraAgentArgs?: string
+      agentProfile?: AgentProfileLaunchRequest
       suppressStartupUpdatePrompt?: boolean
       /** Run now is the user's act; a scheduled run is background and a stopped WSL distro holds it. */
       wslUserAct?: true
@@ -217,6 +219,7 @@ export abstract class OrcaRuntimeWithTerminalCreateDeduplication extends OrcaRun
         ...(opts.agentArgs !== undefined ? { agentArgs: opts.agentArgs } : {}),
         ...(opts.sessionOptions !== undefined ? { sessionOptions: opts.sessionOptions } : {}),
         ...(opts.extraAgentArgs !== undefined ? { extraAgentArgs: opts.extraAgentArgs } : {}),
+        ...(opts.agentProfile ? { agentProfile: opts.agentProfile } : {}),
         ...(prompt && commandPrompt ? { startupPrompt: prompt } : {}),
         startupPromptCarry: 'force-line',
         startupPromptDelivery: 'auto-submit',

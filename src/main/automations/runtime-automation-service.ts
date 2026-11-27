@@ -198,7 +198,8 @@ export function createRuntimeAutomationService(input: {
       launch: async (request) => {
         const { terminalHandle, ...launched } = await launchAutomationTerminalAgent(runtime, {
           ...request,
-          runs: store.listAutomationRuns(request.automation.id)
+          runs: store.listAutomationRuns(request.automation.id),
+          settings: store.getSettings()
         })
         const launch = {
           ...launched,
