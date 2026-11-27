@@ -1,7 +1,9 @@
 import { mkdir, rename, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
-import type { ClaudeProfileLaunch } from '../../../shared/agent-profile/claude-profile-launch-args'
-import type { ClaudeProfileLaunchFiles } from '../../../shared/agent-profile/claude-profile-launch-args'
+import type {
+  ClaudeProfileLaunch,
+  ClaudeProfileLaunchFiles
+} from '../../../shared/agent-profile/claude-profile-launch-args'
 
 async function writeFileAtomically(path: string, content: string): Promise<void> {
   await mkdir(dirname(path), { recursive: true })
