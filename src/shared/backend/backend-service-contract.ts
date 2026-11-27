@@ -47,7 +47,8 @@ export const UsageActionSchema = lazyZodSchema(() =>
     'getSummary',
     'getDaily',
     'getBreakdown',
-    'getRecentSessions'
+    'getRecentSessions',
+    'getProfileLoadout'
   ])
 )
 export type UsageAction = z.infer<typeof UsageActionSchema>

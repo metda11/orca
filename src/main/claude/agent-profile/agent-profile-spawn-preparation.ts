@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { join } from 'node:path'
 import { getAppEnvironment } from '../../../shared/app-lifecycle/app-environment'
 import type { GlobalSettings } from '../../../shared/settings/global-settings-types'
@@ -10,6 +11,8 @@ import {
   isSafeAgentProfileId
 } from '../../../shared/agent-profile/claude-profile-files'
 import { buildClaudeProfileLaunch } from '../../../shared/agent-profile/claude-profile-launch-args'
+import { buildClaudeProfileSoll } from '../../../shared/agent-profile/loadout/claude-profile-soll'
+import { recordProfileRun } from '../../claude-usage/loadout/profile-run-registry'
 import { readClaudePluginInventory } from '../plugin-inventory/claude-plugin-inventory'
 import { materializeClaudeProfileFiles } from './claude-profile-file-materialization'
 
@@ -35,13 +38,23 @@ export async function prepareAgentProfileForPtySpawn(args: {
   }
   const rootDir = args.userDataDir ?? join(getAppEnvironment().getPath('userData'))
   const files = claudeProfileLaunchFiles(rootDir, profile.id)
-  const installedPluginIds = profile.enabledPlugins
-    ? (
-        await readClaudePluginInventory({ accountHomePath: null, cwd: args.cwd ?? null })
-      ).plugins.map((plugin) => plugin.id)
+  const installedPlugins = profile.enabledPlugins
+    ? (await readClaudePluginInventory({ accountHomePath: null, cwd: args.cwd ?? null })).plugins
     : []
   await materializeClaudeProfileFiles(
-    buildClaudeProfileLaunch(profile, { installedPluginIds, files }),
+    buildClaudeProfileLaunch(profile, {
+      installedPluginIds: installedPlugins.map((plugin) => plugin.id),
+      files
+    }),
     files
   )
+  // Why: the run record only feeds usage reporting; a failed write must not stop the agent starting.
+  await recordProfileRun(rootDir, {
+    runId: randomUUID(),
+    profileId: profile.id,
+    profileName: profile.name,
+    cwd: args.cwd ?? null,
+    startedAt: Date.now(),
+    soll: buildClaudeProfileSoll(profile, installedPlugins)
+  }).catch((error: unknown) => console.warn('[agent-profile] run record not written', error))
 }

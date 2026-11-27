@@ -89,6 +89,7 @@ export function createUsageService(host: UsageStoreHost) {
   const all = Object.values(stores)
   const handlers = new Map<string, Handler>()
   registerUsageQueries(handlers, 'claudeUsage', stores.claudeUsage)
+  handlers.set('claudeUsage:getProfileLoadout', () => stores.claudeUsage.getProfileLoadoutReport())
   registerUsageQueries(handlers, 'codexUsage', stores.codexUsage)
   registerUsageQueries(handlers, 'openCodeUsage', stores.openCodeUsage)
   registerUsageQueries(handlers, 'museUsage', stores.museUsage)
