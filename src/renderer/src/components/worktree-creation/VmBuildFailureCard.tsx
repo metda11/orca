@@ -1,9 +1,12 @@
 import React from 'react'
-import { Bot, Pencil, RotateCcw, SquareArrowOutUpRight } from 'lucide-react'
+import { Bot, Loader2, Pencil, RotateCcw, SquareArrowOutUpRight, Wrench } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/class-names'
 import { useTranslate } from '@/i18n/use-translate'
-import type { EnvironmentDoctorCheck } from '../../../../shared/workspace-setup/environment-doctor/environment-doctor-types'
+import type {
+  EnvironmentDoctorCheck,
+  EnvironmentDoctorFixOutcome
+} from '../../../../shared/workspace-setup/environment-doctor/environment-doctor-types'
 import { VmBuildReveal } from './VmBuildReveal'
 
 export type VmBuildFailure =
@@ -14,6 +17,7 @@ export type VmBuildFailure =
 export function VmBuildFailureCard({
   failure,
   canFixWithAgent,
+  onRunFix,
   onFixWithAgent,
   onRetry,
   onEditRecipe,
@@ -22,6 +26,8 @@ export function VmBuildFailureCard({
 }: {
   failure: VmBuildFailure | null
   canFixWithAgent: boolean
+  /** Runs the host's allowlisted repair for one check id; absent when the check target is unknown. */
+  onRunFix?: (checkId: string) => Promise<EnvironmentDoctorFixOutcome>
   onFixWithAgent: () => void
   onRetry: () => void
   onEditRecipe: () => void
@@ -64,7 +70,7 @@ export function VmBuildFailureCard({
           {visible.kind === 'checks' ? (
             <ul key={run} className="flex flex-col gap-2">
               {visible.problems.map((check, index) => (
-                <CheckRow key={check.id} check={check} index={index} />
+                <CheckRow key={check.id} check={check} index={index} onRunFix={onRunFix} />
               ))}
             </ul>
           ) : (
@@ -111,11 +117,30 @@ export function VmBuildFailureCard({
 
 function CheckRow({
   check,
-  index
+  index,
+  onRunFix
 }: {
   check: EnvironmentDoctorCheck
   index: number
+  onRunFix?: (checkId: string) => Promise<EnvironmentDoctorFixOutcome>
 }): React.JSX.Element {
+  const t = useTranslate()
+  const [running, setRunning] = React.useState(false)
+  const [outcome, setOutcome] = React.useState<EnvironmentDoctorFixOutcome | null>(null)
+  // Only the id is sent; the button shows up whenever the host offered a repair for this check.
+  const canFix = Boolean(onRunFix && check.fixCommand?.length)
+  const runFix = async (): Promise<void> => {
+    if (!onRunFix || running) {
+      return
+    }
+    setRunning(true)
+    setOutcome(null)
+    try {
+      setOutcome(await onRunFix(check.id))
+    } finally {
+      setRunning(false)
+    }
+  }
   return (
     <li
       // Rows arrive together; a short stagger lets the eye read them top to bottom.
@@ -137,6 +162,26 @@ function CheckRow({
         <p className="ml-11 whitespace-pre-wrap break-words text-muted-foreground">
           {check.remediation}
         </p>
+      ) : null}
+      {canFix ? (
+        <div className="ml-11 flex flex-wrap items-center gap-2 pt-0.5">
+          <Button
+            type="button"
+            variant="outline"
+            size="xs"
+            disabled={running}
+            onClick={() => void runFix()}
+          >
+            {running ? <Loader2 className="motion-safe:animate-spin" /> : <Wrench />}
+            {t('auto.components.worktree.creation.VmBuildSheet.runFix', 'Fix')}
+          </Button>
+          <code className="min-w-0 break-all font-mono text-[10px] text-muted-foreground">
+            {check.fixCommand?.join(' ')}
+          </code>
+        </div>
+      ) : null}
+      {outcome && !outcome.ok ? (
+        <p className="ml-11 whitespace-pre-wrap break-words text-destructive">{outcome.message}</p>
       ) : null}
     </li>
   )

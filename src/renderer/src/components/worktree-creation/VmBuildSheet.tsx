@@ -3,6 +3,7 @@ import { AlertTriangle, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/class-names'
 import { useTranslate, type Translate } from '@/i18n/use-translate'
 import { resolveVmEnvironmentCheckDecision } from '@/runtime/ephemeral-vm/ephemeral-vm-environment-check-decision'
+import { runVmWorkstationFix } from '@/runtime/ephemeral-vm/ephemeral-vm-workstation-fix'
 import type { PendingWorktreeCreation } from '@/lib/workspace/creation/pending-worktree-creation'
 import { toast } from 'sonner'
 import type { EnvironmentSetupFailureContext } from '../../../../shared/workspace-setup/environment-doctor/environment-setup-agent-prompt'
@@ -114,6 +115,17 @@ export function VmBuildSheet({
     })
   }
 
+  const target = entry.environmentCheck?.target
+  const runFix = target
+    ? async (checkId: string) => {
+        const outcome = await runVmWorkstationFix(target.environmentId, target.path, checkId)
+        if (outcome.ok) {
+          resolveVmEnvironmentCheckDecision(creationId, 'retry')
+        }
+        return outcome
+      }
+    : undefined
+
   const failure: VmBuildFailure | null = checksFailed
     ? { kind: 'checks', problems }
     : error !== null
@@ -179,6 +191,7 @@ export function VmBuildSheet({
           <VmBuildFailureCard
             failure={failure}
             canFixWithAgent={Boolean(recipe)}
+            onRunFix={runFix}
             onFixWithAgent={fixWithAgent}
             onRetry={
               checksFailed ? () => resolveVmEnvironmentCheckDecision(creationId, 'retry') : onRetry

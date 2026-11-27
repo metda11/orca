@@ -583,7 +583,10 @@ import {
   AgentCliUpdateCheckParams,
   AgentCliUpdateRunParams
 } from './host-management/agent-cli-update-params'
-import { EnvironmentDoctorParams } from './host-management/environment-doctor-params'
+import {
+  EnvironmentDoctorFixParams,
+  EnvironmentDoctorParams
+} from './host-management/environment-doctor-params'
 import {
   ManagedRuntimeAgentParams,
   ManagedRuntimeCancelParams
@@ -1621,6 +1624,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'emulator.type': TypeParams,
   'emulator.unregisterActive': EmulatorUnregisterActiveParams,
   'environment.doctor': EnvironmentDoctorParams,
+  'environment.doctor.fix': EnvironmentDoctorFixParams,
   'files.browseServerDir': ServerDirectoryBrowse,
   'files.commitUpload': FileCommitUpload,
   'files.copy': FileCopy,
