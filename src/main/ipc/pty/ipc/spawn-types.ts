@@ -38,6 +38,8 @@ export type PtySpawnIpcArgs = {
   resumeOrigin?: unknown
   launchToken?: unknown
   launchAgent?: TuiAgent
+  // Saved Claude loadout whose files main writes before the PTY starts.
+  agentProfileId?: string
   trustWorktreeId?: string
   startupCommandDelivery?: StartupCommandDelivery
   connectionId?: string | null

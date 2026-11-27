@@ -55,6 +55,7 @@ export const ptySessionControlApi = {
     launchToken?: string
     launchAgent?: TuiAgent
     trustWorktreeId?: string
+    agentProfileId?: string
     startupCommandDelivery?: StartupCommandDelivery
     connectionId?: string | null
     worktreeId?: string

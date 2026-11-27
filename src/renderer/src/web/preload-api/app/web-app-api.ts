@@ -55,6 +55,8 @@ export function createWebAppApi(): Partial<PreloadApi> {
       getKeyboardLayoutSnapshot: () => Promise.resolve(null),
       onKeyboardLayoutChanged: () => () => undefined,
       getFloatingTerminalCwd: () => Promise.resolve(''),
+      // The web client has no local userData, so profile starts are refused there.
+      getAgentProfileRoot: () => Promise.resolve(''),
       getFloatingMarkdownDirectory: () => Promise.resolve(''),
       pickFloatingMarkdownDocument: () => Promise.resolve(null),
       pickFloatingWorkspaceDirectory: () => Promise.resolve(null),

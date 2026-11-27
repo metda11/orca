@@ -103,6 +103,7 @@ export const appApi = {
   },
   getFloatingTerminalCwd: (args?: FloatingTerminalCwdRequest): Promise<string> =>
     ipcRenderer.invoke('app:getFloatingTerminalCwd', args),
+  getAgentProfileRoot: (): Promise<string> => ipcRenderer.invoke('app:getAgentProfileRoot'),
   getFloatingMarkdownDirectory: (): Promise<string> =>
     ipcRenderer.invoke('app:getFloatingMarkdownDirectory'),
   pickFloatingMarkdownDocument: (): Promise<MarkdownDocument | null> =>

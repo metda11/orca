@@ -139,6 +139,7 @@ export async function spawnIpcPty(
     ...(transportOptions.trustWorktreeId
       ? { trustWorktreeId: transportOptions.trustWorktreeId }
       : {}),
+    ...(transportOptions.agentProfileId ? { agentProfileId: transportOptions.agentProfileId } : {}),
     ...(tabId ? { tabId } : {}),
     ...(leafId ? { leafId } : {}),
     ...(placement && !admittedSessionId ? { placement } : {}),

@@ -8,6 +8,10 @@ import {
 import { resolveStartupShell, type AgentStartupShell } from './tui-agent-startup-shell'
 import { terminalSessionOptionInputs } from './tui-agent-launch-command'
 import { resolveLocalWindowsAgentStartupShell } from '../../shell/launch/windows-terminal-shell'
+import {
+  resolveClaudeProfileStartupArgs,
+  type AgentProfileLaunchRequest
+} from '../../agent-profile/claude-profile-startup-args'
 
 /** The settings slice a launch reads; hosts pass their whole `GlobalSettings` row. */
 export type AgentStartupSettings = Partial<
@@ -19,6 +23,7 @@ export type AgentStartupSettings = Partial<
     | 'agentDefaultEnv'
     | 'agentPermissionDefault'
     | 'agentPermissionOverrides'
+    | 'agentProfiles'
     | 'terminalWindowsShell'
   >
 >
@@ -53,6 +58,8 @@ export function resolveAgentStartupPlanInputs(args: {
   sessionOptionsYieldToAgentArgs?: boolean
   /** Orca types into this launch after start (worker, automation, handoff), not a user. */
   suppressStartupUpdatePrompt?: boolean
+  /** A saved Claude loadout; throws `AgentProfileLaunchError` where it cannot apply. */
+  agentProfile?: AgentProfileLaunchRequest
 }): AgentStartupPlanInputs {
   const { agent, platform, isRemote, sessionOptions } = args
   const settings = agentLaunchPermissionSettings(agent, args.settings, sessionOptions)
@@ -73,16 +80,27 @@ export function resolveAgentStartupPlanInputs(args: {
     extraAgentArgs: args.extraAgentArgs,
     shell: resolveStartupShell(platform, shell)
   })
+  const profileArgs = args.agentProfile
+    ? resolveClaudeProfileStartupArgs({
+        agent,
+        profiles: settings.agentProfiles,
+        request: args.agentProfile,
+        shell: resolveStartupShell(platform, shell),
+        isRemote
+      })
+    : ''
+  // Why first: later flags win, so an explicit model or permission pick still overrides the profile.
+  const agentArgs = [profileArgs, options.agentArgs?.trim() ?? ''].filter(Boolean).join(' ')
   return {
     agent,
     cmdOverrides: settings.agentCmdOverrides ?? {},
-    agentArgs: options.agentArgs ?? null,
     agentEnv: resolveTuiAgentLaunchEnv(agent, settings, platform),
     platform,
     shell,
     isRemote,
     sessionOptionsOverrideAgentArgs: false,
     ...options,
+    agentArgs: agentArgs || (options.agentArgs ?? null),
     ...(args.suppressStartupUpdatePrompt ? { suppressStartupUpdatePrompt: true } : {})
   }
 }

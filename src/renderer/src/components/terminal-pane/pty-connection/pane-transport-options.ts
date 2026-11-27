@@ -176,6 +176,9 @@ export function buildPaneTransportOptions(session: ConnectPanePtySession): IpcPt
     ...(session.paneStartup?.trustWorktreeId
       ? { trustWorktreeId: session.paneStartup.trustWorktreeId }
       : {}),
+    ...(session.paneStartup?.agentProfileId
+      ? { agentProfileId: session.paneStartup.agentProfileId }
+      : {}),
     ...(session.paneStartup?.agentLaunch ? { agentLaunch: session.paneStartup.agentLaunch } : {}),
     ...(session.paneStartup?.telemetry ? { telemetry: session.paneStartup.telemetry } : {}),
     onPtyExit: session.onExit,

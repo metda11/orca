@@ -73,6 +73,8 @@ export type AppApi = {
   /** Subscribes to active macOS input-source changes. No-op in the browser fallback. */
   onKeyboardLayoutChanged: (callback: (event: KeyboardLayoutChangeEvent) => void) => () => void
   getFloatingTerminalCwd: (args?: FloatingTerminalCwdRequest) => Promise<string>
+  /** Orca's userData folder, where saved agent profiles keep the files a start points at. */
+  getAgentProfileRoot: () => Promise<string>
   /** App-owned directory for auto-created Floating Workspace notes. */
   getFloatingMarkdownDirectory: () => Promise<string>
   /** Picks a Floating Workspace document and authorizes editor reads/writes. */

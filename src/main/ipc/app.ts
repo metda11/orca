@@ -239,6 +239,8 @@ export function registerAppHandlers(store: Store, options: RegisterAppHandlersOp
     resolveFloatingTerminalCwd(store, args)
   )
 
+  ipcMain.handle('app:getAgentProfileRoot', (): string => app.getPath('userData'))
+
   ipcMain.handle('app:getFloatingMarkdownDirectory', () => ensureDefaultFloatingWorkspacePath())
 
   ipcMain.handle('app:pickFloatingMarkdownDocument', (event) => pickFloatingMarkdownDocument(event))
