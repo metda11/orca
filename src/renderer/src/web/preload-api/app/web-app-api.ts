@@ -57,6 +57,7 @@ export function createWebAppApi(): Partial<PreloadApi> {
       getFloatingTerminalCwd: () => Promise.resolve(''),
       // The web client has no local userData, so profile starts are refused there.
       getAgentProfileRoot: () => Promise.resolve(''),
+      preflightAgentProfile: () => Promise.resolve([]),
       getFloatingMarkdownDirectory: () => Promise.resolve(''),
       pickFloatingMarkdownDocument: () => Promise.resolve(null),
       pickFloatingWorkspaceDirectory: () => Promise.resolve(null),

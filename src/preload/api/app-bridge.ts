@@ -1,6 +1,8 @@
 import { ipcRenderer } from 'electron'
 import type { AppIdentity } from '../../shared/app-lifecycle/identity/app-identity'
 import type { MacosUpgradeSupport } from '../../shared/updater/requirements/macos-upgrade-support'
+import type { AgentProfilePreflightFinding } from '../../shared/agent-profile/agent-profile-preflight'
+import type { AgentProfilePreflightRequest } from '../../shared/agent-profile/agent-profile-preflight-request'
 import type { FloatingTerminalCwdRequest } from '../../shared/ui-chrome/ui-chrome-types'
 import type { MacCapturedDigitRowChord } from '../../shared/keybindings/macos-symbolic-hotkeys'
 import type { MarkdownDocument } from '../../shared/file-listing/file-document'
@@ -104,6 +106,10 @@ export const appApi = {
   getFloatingTerminalCwd: (args?: FloatingTerminalCwdRequest): Promise<string> =>
     ipcRenderer.invoke('app:getFloatingTerminalCwd', args),
   getAgentProfileRoot: (): Promise<string> => ipcRenderer.invoke('app:getAgentProfileRoot'),
+  preflightAgentProfile: (
+    request: AgentProfilePreflightRequest
+  ): Promise<AgentProfilePreflightFinding[]> =>
+    ipcRenderer.invoke('app:preflightAgentProfile', request),
   getFloatingMarkdownDirectory: (): Promise<string> =>
     ipcRenderer.invoke('app:getFloatingMarkdownDirectory'),
   pickFloatingMarkdownDocument: (): Promise<MarkdownDocument | null> =>

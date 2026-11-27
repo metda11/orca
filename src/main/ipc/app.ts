@@ -1,3 +1,4 @@
+import { answerAgentProfilePreflight } from '../claude/agent-profile/agent-profile-preflight-request'
 import { getSystemLanguageDetection } from '../i18n/system-language'
 import { setMainUiLanguage } from '../i18n/main-i18n'
 import { rebuildAppMenu } from '../menu/register-app-menu'
@@ -240,6 +241,9 @@ export function registerAppHandlers(store: Store, options: RegisterAppHandlersOp
   )
 
   ipcMain.handle('app:getAgentProfileRoot', (): string => app.getPath('userData'))
+  ipcMain.handle('app:preflightAgentProfile', (_event, request: unknown) =>
+    answerAgentProfilePreflight(request, store.getSettings())
+  )
 
   ipcMain.handle('app:getFloatingMarkdownDirectory', () => ensureDefaultFloatingWorkspacePath())
 

@@ -9,13 +9,17 @@ import { isSafeAgentProfileId } from '../../../../../../shared/agent-profile/cla
 import type { ClaudeAgentProfile } from '../../../../../../shared/agent-profile/agent-profile-types'
 import { readAgentProfileRoot } from './agent-profile-root'
 
-const REFUSAL_MESSAGES: Record<AgentProfileRefusal | 'agent_profile_id_invalid', string> = {
+const REFUSAL_MESSAGES: Record<
+  AgentProfileRefusal | 'agent_profile_id_invalid' | 'agent_profile_preflight_failed',
+  string
+> = {
   agent_profile_agent_unsupported: 'Agent profiles only apply to Claude.',
   agent_profile_host_unsupported:
     'Agent profiles only start on this computer, not on a remote host, WSL or the web client.',
   agent_profile_unknown: 'The agent profile no longer exists.',
   agent_profile_account_unsupported: 'Agent profiles with a Claude account cannot start yet.',
-  agent_profile_id_invalid: 'The agent profile id is invalid.'
+  agent_profile_id_invalid: 'The agent profile id is invalid.',
+  agent_profile_preflight_failed: 'The agent profile failed its preflight check.'
 }
 
 export type AgentProfileLaunchResolution =
