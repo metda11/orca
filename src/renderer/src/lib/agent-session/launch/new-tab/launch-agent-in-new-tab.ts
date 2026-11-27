@@ -6,6 +6,7 @@ import {
 import type { LaunchAgentInNewTabArgs } from '@/lib/agent-session/launch/new-tab/launch-agent-in-new-tab-args'
 import { useAppStore } from '@/store/index'
 import { toast } from 'sonner'
+import { withEffectiveAgentProfiles } from '@/lib/agent-session/launch/profile/effective-agent-profiles'
 import { invalidTerminalArgsMessage } from '../../../workspace/creation/work-item/launch-work-item-direct-messages'
 import {
   agentLaunchCheckSettingsMessage,
@@ -36,8 +37,7 @@ import { launchOnceHostAnswered, routeNewTabLaunch } from './launch-agent-in-new
 import type { AgentTabLaunchOutcome } from './launch-agent-in-new-tab-host-agents'
 
 /**
- * Create a new terminal tab and queue the agent's launch command, optionally
- * with an initial prompt.
+ * Create a new terminal tab and queue the agent's launch command, optionally with a prompt.
  *
  * Submission mode follows `promptInjectionMode`: argv/flag agents fold the
  * prompt into the launch command; followup-path agents launch empty and get a
@@ -167,21 +167,20 @@ function openAgentInNewTab(
   if ('refused' in profilePlan) {
     return profilePlan.refused
   }
-  const agentProfile = profilePlan.request
   const buildStartup = (
     agentLaunchChoices = readAgentLaunchPreferencesForWorktree(store, worktreeId).agentLaunchChoices
   ) =>
     planLaunchAgentStartupPrompt({
       base: resolveAgentStartupPlanInputs({
         agent,
-        settings: { ...store.settings, agentLaunchChoices },
+        settings: withEffectiveAgentProfiles({ ...store.settings, agentLaunchChoices }),
         agentArgs,
         sessionOptions,
         sessionOptionsYieldToAgentArgs: args.sessionOptionsYieldToAgentArgs,
         platform: resolvedLaunchPlatform,
         shell: queuedShell,
         isRemote,
-        agentProfile
+        agentProfile: profilePlan.request
       }),
       prompt: trimmedPrompt,
       promptDelivery,
@@ -266,7 +265,7 @@ function openAgentInNewTab(
     ...(activate === false ? { activate: false } : {}),
     pendingStartup: {
       ...(trustWorktreeId ? { trustWorktreeId } : {}),
-      ...(agentProfile ? { agentProfileId: agentProfile.id } : {}),
+      ...(profilePlan.request ? { agentProfileId: profilePlan.request.id } : {}),
       command: startupPlan.launchCommand,
       ...(startupPlan.env ? { env: startupPlan.env } : {}),
       launchConfig: startupPlan.launchConfig,
