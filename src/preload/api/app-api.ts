@@ -15,6 +15,8 @@ import type {
 } from '../../shared/agent-profile/agent-profile-catalog'
 import type { MarkdownDocument } from '../../shared/file-listing/file-document'
 import type { PersistedUIState } from '../../shared/orca-profiles/persisted-ui-state-types'
+import type { AgentProfilePreflightFinding } from '../../shared/agent-profile/agent-profile-preflight'
+import type { AgentProfilePreflightRequest } from '../../shared/agent-profile/agent-profile-preflight-request'
 import type { FloatingTerminalCwdRequest } from '../../shared/ui-chrome/ui-chrome-types'
 import type { WorkspaceSessionState } from '../../shared/workspace-session/workspace-session-state-types'
 import type { KeyboardLayoutSnapshot } from '../../shared/keybindings/keyboard-layout-snapshot'
@@ -79,6 +81,10 @@ export type AppApi = {
   getFloatingTerminalCwd: (args?: FloatingTerminalCwdRequest) => Promise<string>
   /** Orca's userData folder, where saved agent profiles keep the files a start points at. */
   getAgentProfileRoot: () => Promise<string>
+  /** What would stop a saved agent profile from starting here; reads inventory and files only. */
+  preflightAgentProfile: (
+    request: AgentProfilePreflightRequest
+  ) => Promise<AgentProfilePreflightFinding[]>
   /** Central, default and local profiles as the picker shows them; seeds bundled defaults on first call. */
   getAgentProfileCatalog: () => Promise<AgentProfileCatalog>
   /** Back to the bundled template; an edited copy is kept as a separate local profile. */

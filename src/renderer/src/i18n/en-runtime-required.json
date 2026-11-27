@@ -3942,6 +3942,10 @@
     }
   },
   "stats": {
+    "profileLoadout": {
+      "unmatched_one": "{{count}} profile start has no matching Claude session yet.",
+      "unmatched_other": "{{count}} profile starts have no matching Claude session yet."
+    },
     "usageBreakdown": {
       "events_one": "{{count}} event",
       "events_other": "{{count}} events",
