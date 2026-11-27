@@ -118,7 +118,8 @@ export const AutomationCreate = lazyZodSchema(() =>
       precheck: AutomationPrecheck,
       agentId: TuiAgent,
       extraAgentArgs: ExtraAgentArgs,
-      agentProfileId: AgentProfileId.optional(),
+      // Why: null means none, as the same copy of an edit may carry the update's null.
+      agentProfileId: AgentProfileId.nullable().optional(),
       launchSetupPatch: AutomationLaunchSetupPatch.optional(),
       runContext: WorkspaceRunContext,
       sourceContext: TaskSourceContext,
