@@ -57,7 +57,7 @@ export function TerminalPaneProfileChip({
   })
   return (
     <span
-      className="pane-title-profile-chip pointer-events-auto ml-1 flex min-w-0 shrink items-center gap-1 self-center truncate rounded-md border border-border/60 px-1.5 text-[11px] leading-4 text-muted-foreground"
+      className="pointer-events-auto ml-1 flex min-w-0 shrink items-center gap-1 self-center truncate rounded-md border border-border/60 px-1.5 text-[11px] leading-4 text-muted-foreground"
       title={label}
       aria-label={label}
       data-pane-profile-id={binding.profileId}
