@@ -3,6 +3,10 @@ import type { AppIdentity } from '../../shared/app-lifecycle/identity/app-identi
 import type { MacosUpgradeSupport } from '../../shared/updater/requirements/macos-upgrade-support'
 import type { FloatingTerminalCwdRequest } from '../../shared/ui-chrome/ui-chrome-types'
 import type { MacCapturedDigitRowChord } from '../../shared/keybindings/macos-symbolic-hotkeys'
+import type {
+  AgentProfileCatalog,
+  ResetDefaultAgentProfileResult
+} from '../../shared/agent-profile/agent-profile-catalog'
 import type { MarkdownDocument } from '../../shared/file-listing/file-document'
 import type { WriteTerminalRenderDesyncEvidenceArgs } from '../../shared/terminal/diagnostics/terminal-render-desync-evidence'
 import {
@@ -104,6 +108,10 @@ export const appApi = {
   getFloatingTerminalCwd: (args?: FloatingTerminalCwdRequest): Promise<string> =>
     ipcRenderer.invoke('app:getFloatingTerminalCwd', args),
   getAgentProfileRoot: (): Promise<string> => ipcRenderer.invoke('app:getAgentProfileRoot'),
+  getAgentProfileCatalog: (): Promise<AgentProfileCatalog> =>
+    ipcRenderer.invoke('app:getAgentProfileCatalog'),
+  resetDefaultAgentProfile: (id: string): Promise<ResetDefaultAgentProfileResult> =>
+    ipcRenderer.invoke('app:resetDefaultAgentProfile', id),
   getFloatingMarkdownDirectory: (): Promise<string> =>
     ipcRenderer.invoke('app:getFloatingMarkdownDirectory'),
   pickFloatingMarkdownDocument: (): Promise<MarkdownDocument | null> =>
