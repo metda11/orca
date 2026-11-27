@@ -1562,6 +1562,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'browser.wait': Wait,
   'browser.zoom': PageZoom,
   'claudePlugins.inventory': ClaudePluginInventoryParams,
+  'claudePlugins.weights': ClaudePluginInventoryParams,
   'clipboard.abortImageUpload': AbortImageUpload,
   'clipboard.appendImageUploadChunk': AppendImageUploadChunk,
   'clipboard.commitImageUpload': CommitImageUpload,
