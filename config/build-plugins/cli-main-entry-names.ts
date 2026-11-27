@@ -22,6 +22,7 @@ export const CLI_MAIN_ENTRY_NAMES = [
   // `orca vm env doctor` runs its checks in the CLI process.
   'environment-doctor/environment-doctor',
   'environment-doctor/environment-doctor-host',
+  'environment-doctor/environment-doctor-workstation-fix',
   'persistence/profile-state/access/profile-state-access',
   'persistence/profile-state/offline-access/profile-state-active-location',
   'persistence/profile-state/database/profile-state-storage-classification',
