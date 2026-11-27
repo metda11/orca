@@ -11,6 +11,10 @@ import type { FloatingTerminalCwdRequest } from '../../shared/ui-chrome/ui-chrom
 import { relaunchApp, runBeforeRelaunchCleanup } from '../startup/quit/app-relaunch'
 import { setWindowMaterialSuppressed } from '../window/presentation/window-material-suppression'
 import { isTrustedUIRenderer } from './ui'
+import {
+  loadAgentProfileCatalog,
+  resetDefaultAgentProfile
+} from '../claude/agent-profile/agent-profile-catalog-service'
 import { handleAppQuitRequest } from './renderer-requests/app-quit-request'
 import { prepareWindowsAdministratorRestart } from '../windows/windows-administrator-restart'
 import { quitProcess } from '../startup/quit/process-quit-request'
@@ -240,6 +244,23 @@ export function registerAppHandlers(store: Store, options: RegisterAppHandlersOp
   )
 
   ipcMain.handle('app:getAgentProfileRoot', (): string => app.getPath('userData'))
+
+  ipcMain.handle('app:getAgentProfileCatalog', async (event) => {
+    if (!isTrustedUIRenderer(event.sender)) {
+      throw new Error('Access denied: unauthorized sender')
+    }
+    return loadAgentProfileCatalog(store)
+  })
+
+  ipcMain.handle('app:resetDefaultAgentProfile', async (event, id: unknown) => {
+    if (!isTrustedUIRenderer(event.sender)) {
+      throw new Error('Access denied: unauthorized sender')
+    }
+    if (typeof id !== 'string') {
+      return { ok: false, reason: 'unknown_default' }
+    }
+    return resetDefaultAgentProfile(store, id)
+  })
 
   ipcMain.handle('app:getFloatingMarkdownDirectory', () => ensureDefaultFloatingWorkspacePath())
 
