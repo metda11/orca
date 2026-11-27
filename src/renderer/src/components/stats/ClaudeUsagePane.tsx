@@ -14,6 +14,7 @@ import type {
   ClaudeUsageScope
 } from '../../../../shared/agent-usage/analytics/claude-usage-types'
 import { useAppStore } from '../../store'
+import { ClaudeProfileLoadoutSection } from './ClaudeProfileLoadoutSection'
 import { ClaudeUsageDetails } from './ClaudeUsageDetails'
 import { ClaudeUsageLoadingState } from './ClaudeUsageLoadingState'
 import { ShareUsageButton } from './ShareUsageButton'
@@ -244,6 +245,7 @@ export function ClaudeUsagePane(): React.JSX.Element {
           recentSessions={recentSessions}
           summary={summary}
         />
+        <ClaudeProfileLoadoutSection scanCompletedAt={scanState.lastScanCompletedAt} />
       </>
     </UsageTrackingPaneShell>
   )

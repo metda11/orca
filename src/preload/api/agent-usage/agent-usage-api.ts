@@ -6,6 +6,7 @@ import type {
   ClaudeUsageBreakdownKind,
   ClaudeUsageSnapshot
 } from '../../../shared/agent-usage/analytics/claude-usage-types'
+import type { ClaudeProfileLoadoutReport } from '../../../shared/agent-usage/analytics/claude-profile-usage-types'
 import type {
   CodexUsageBreakdownKind,
   CodexUsageSnapshot
@@ -58,7 +59,9 @@ export type UsageProviderApi<Snapshot extends UsageProviderSnapshot, BreakdownKi
   ) => Promise<Snapshot['recentSessions']>
 }
 
-export type ClaudeUsageApi = UsageProviderApi<ClaudeUsageSnapshot, ClaudeUsageBreakdownKind>
+export type ClaudeUsageApi = UsageProviderApi<ClaudeUsageSnapshot, ClaudeUsageBreakdownKind> & {
+  getProfileLoadout: () => Promise<ClaudeProfileLoadoutReport>
+}
 
 export type CodexUsageApi = UsageProviderApi<CodexUsageSnapshot, CodexUsageBreakdownKind>
 
