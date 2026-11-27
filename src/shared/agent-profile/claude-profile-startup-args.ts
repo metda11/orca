@@ -6,6 +6,10 @@ import {
 import type { ClaudeAgentProfile } from './agent-profile-types'
 import { claudeProfileLaunchFiles } from './claude-profile-files'
 import { buildClaudeProfileLaunch } from './claude-profile-launch-args'
+import {
+  formatAgentProfilePreflight,
+  type AgentProfilePreflightFinding
+} from './agent-profile-preflight'
 
 // Flags and plain values stay readable (and visible to model detection); anything else is quoted.
 const PLAIN_ARG = /^[A-Za-z0-9_./:=@+,-]+$/
@@ -24,8 +28,15 @@ export type AgentProfileRefusal =
   | 'agent_profile_account_unsupported'
 
 export class AgentProfileLaunchError extends Error {
-  constructor(readonly code: AgentProfileRefusal | 'agent_profile_id_invalid') {
-    super(code)
+  constructor(
+    readonly code:
+      | AgentProfileRefusal
+      | 'agent_profile_id_invalid'
+      | 'agent_profile_preflight_failed',
+    /** Set with `agent_profile_preflight_failed`: what the preflight found wrong with the profile. */
+    readonly findings: readonly AgentProfilePreflightFinding[] = []
+  ) {
+    super(findings.length ? formatAgentProfilePreflight(findings) : code)
   }
 }
 

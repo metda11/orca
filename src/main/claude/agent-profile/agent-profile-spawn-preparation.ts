@@ -15,6 +15,8 @@ import { buildClaudeProfileSoll } from '../../../shared/agent-profile/loadout/cl
 import { recordProfileRun } from '../../claude-usage/loadout/profile-run-registry'
 import { readClaudePluginInventory } from '../plugin-inventory/claude-plugin-inventory'
 import { materializeClaudeProfileFiles } from './claude-profile-file-materialization'
+import { agentProfilePreflightErrors } from '../../../shared/agent-profile/agent-profile-preflight'
+import { runClaudeProfilePreflight } from './agent-profile-preflight'
 
 /** Write the files a profile start points at; refuses what the renderer's plan cannot have covered. */
 export async function prepareAgentProfileForPtySpawn(args: {
@@ -35,6 +37,13 @@ export async function prepareAgentProfileForPtySpawn(args: {
   // Why: routing a start through a managed account is not wired yet; the default account would be a silent mismatch.
   if (profile.accountId) {
     throw new AgentProfileLaunchError('agent_profile_account_unsupported')
+  }
+  // Why: Claude accepts a wrong loadout silently, so the start would run green while doing less than configured.
+  const blocking = agentProfilePreflightErrors(
+    await runClaudeProfilePreflight({ profile, cwd: args.cwd ?? null })
+  )
+  if (blocking.length) {
+    throw new AgentProfileLaunchError('agent_profile_preflight_failed', blocking)
   }
   const rootDir = args.userDataDir ?? join(getAppEnvironment().getPath('userData'))
   const files = claudeProfileLaunchFiles(rootDir, profile.id)

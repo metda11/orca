@@ -1,8 +1,12 @@
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { prepareAgentProfileForPtySpawn } from './agent-profile-spawn-preparation'
+
+vi.mock('../configuration/claude-sideload-policy', () => ({
+  readClaudeSideloadDisabled: () => Promise.resolve(false)
+}))
 
 let root: string | null = null
 afterEach(async () => {
@@ -15,7 +19,8 @@ afterEach(async () => {
 const settings = {
   agentProfiles: [
     { id: 'p1', name: 'P', mcpServers: { s: { command: 'x' } } },
-    { id: 'acc', name: 'A', accountId: 'acct' }
+    { id: 'acc', name: 'A', accountId: 'acct' },
+    { id: 'gone', name: 'G', pluginDirs: ['/orca-test-no-such-plugin-dir'] }
   ]
 }
 
@@ -48,5 +53,13 @@ describe('prepareAgentProfileForPtySpawn', () => {
     await prepareAgentProfileForPtySpawn({ profileId: 'p1', settings, userDataDir: root })
     const mcp = await readFile(join(root, 'agent-profiles', 'p1', 'mcp.json'), 'utf8')
     expect(JSON.parse(mcp)).toEqual({ mcpServers: { s: { command: 'x' } } })
+  })
+
+  it('blocks the start, naming what is wrong, and writes nothing', async () => {
+    root = await mkdtemp(join(tmpdir(), 'orca-profile-'))
+    await expect(
+      prepareAgentProfileForPtySpawn({ profileId: 'gone', settings, userDataDir: root })
+    ).rejects.toThrow('/orca-test-no-such-plugin-dir does not exist')
+    await expect(readFile(join(root, 'agent-profiles', 'gone', 'settings.json'))).rejects.toThrow()
   })
 })

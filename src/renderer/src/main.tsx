@@ -9,6 +9,7 @@ import App from './App'
 import { RecoverableRenderErrorBoundary } from './components/error-boundaries/RecoverableRenderErrorBoundary'
 import { installRendererCrashDiagnostics } from './diagnostics/crash-reporting/crash-diagnostics'
 import { recordRendererCrashBreadcrumb } from './diagnostics/crash-reporting/crash-breadcrumb-recorder'
+import { refreshEffectiveAgentProfiles } from './lib/agent-session/launch/profile/effective-agent-profiles'
 import { primeAgentProfileRoot } from './lib/agent-session/launch/profile/agent-profile-root'
 import { installAutomationHostDiagnostic } from './components/automations/hosts/automation-host-diagnostics'
 import {
@@ -48,6 +49,7 @@ installFocusedHostGestureWake()
 installAppKeyboardRouter()
 installAutomationHostDiagnostic()
 void primeAgentProfileRoot()
+void refreshEffectiveAgentProfiles()
 // Track from startup: a browser page can take focus before the lazy terminal chunk mounts.
 trackPageFocusLossForTerminalIme()
 trackWindowActivationForTerminalDragRegions()
