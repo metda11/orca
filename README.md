@@ -323,6 +323,8 @@ Pair with your desktop app to monitor and steer your agents from your phone.
 
 Want to contribute or run locally? See our [CONTRIBUTING.md](.github/CONTRIBUTING.md) guide.
 
+**Fork: build and start locally on Windows** with `.\start.ps1` from the repo root. It activates Node 24 via fnm, installs pnpm if missing, loads the Visual Studio C++ build environment, then runs `config/scripts/local-fork/start-local-fork.ps1`: dev build with an isolated profile by default, or `.\start.ps1 -Mode Packaged` for the packaged app in `dist\win-unpacked` (shares the installed Orca's profile). Prerequisites: [fnm](https://github.com/Schniz/fnm) and the VS 2022 Build Tools with the C++ workload. Options: `Get-Help config/scripts/local-fork/start-local-fork.ps1 -Full`.
+
 <a href="https://github.com/stablyai/orca/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=stablyai/orca&max=500&columns=30" alt="Orca contributors" />
 </a>
