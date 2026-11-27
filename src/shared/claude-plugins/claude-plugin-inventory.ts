@@ -30,6 +30,8 @@ export type ClaudePluginInventory = {
   /** The Claude config folder the inventory was read from (the account's `CLAUDE_CONFIG_DIR`). */
   configDir: string
   cwd: string | null
+  /** Set for a WSL workspace: `configDir`, `cwd` and every `installPath` are then that distro's Linux paths. */
+  wslDistro?: string
   plugins: ClaudePluginInventoryEntry[]
   /** Servers of the workspace's `.mcp.json`, which every session there loads besides the plugins. */
   workspaceMcpServers: string[]

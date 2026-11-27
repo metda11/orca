@@ -1,8 +1,6 @@
 // What one plugin folder brings, read the way Claude loads it: default `skills/`, `agents/` and
 // `commands/` plus the manifest's extra paths, and MCP servers from the manifest or `.mcp.json`.
-import { readdir, stat } from 'node:fs/promises'
-import { basename, extname, isAbsolute, join, relative, resolve, sep } from 'node:path'
-import { readPluginMetadataFile } from '../../skills/discovery/plugin-skill-metadata'
+import { nativePluginFolderFs, type PluginFolderFs } from './claude-plugin-folder-fs'
 import {
   asRecord,
   parseJsonObject
@@ -21,19 +19,13 @@ export type ClaudePluginFolderRead = {
 
 const EMPTY: ClaudePluginContents = { skills: [], agents: [], commands: [], mcpServers: [] }
 
-async function isDirectory(path: string): Promise<boolean> {
-  return stat(path).then(
-    (entry) => entry.isDirectory(),
-    () => false
-  )
-}
-
-async function entriesOf(dir: string) {
-  return readdir(dir, { withFileTypes: true }).catch(() => [])
+async function isDirectory(fs: PluginFolderFs, path: string): Promise<boolean> {
+  return (await fs.stat(path))?.isDirectory === true
 }
 
 // Manifest paths are relative to the plugin root; one that leaves it is ignored.
-function manifestPaths(root: string, value: unknown): string[] {
+function manifestPaths(fs: PluginFolderFs, root: string, value: unknown): string[] {
+  const { isAbsolute, relative, resolve, sep } = fs.path
   const values = Array.isArray(value) ? value : value === undefined ? [] : [value]
   return values.flatMap((entry) => {
     if (typeof entry !== 'string' || !entry.trim()) {
@@ -56,17 +48,14 @@ function frontmatterName(text: string | null): string | null {
   return name || null
 }
 
-async function readSkills(dirs: readonly string[]): Promise<string[]> {
+async function readSkills(fs: PluginFolderFs, dirs: readonly string[]): Promise<string[]> {
   const names = new Set<string>()
   for (const dir of dirs) {
-    for (const entry of await entriesOf(dir)) {
+    for (const entry of await fs.readdir(dir)) {
       if (names.size >= MAX_ENTRIES_PER_KIND) {
         break
       }
-      if (
-        entry.isDirectory() &&
-        (await stat(join(dir, entry.name, 'SKILL.md')).catch(() => null))
-      ) {
+      if (entry.isDirectory && (await fs.stat(fs.path.join(dir, entry.name, 'SKILL.md')))) {
         names.add(entry.name)
       }
     }
@@ -74,17 +63,18 @@ async function readSkills(dirs: readonly string[]): Promise<string[]> {
   return [...names].sort()
 }
 
-async function readAgents(paths: readonly string[]): Promise<string[]> {
+async function readAgents(fs: PluginFolderFs, paths: readonly string[]): Promise<string[]> {
+  const { basename, extname, join } = fs.path
   const names = new Set<string>()
   const add = async (file: string) => {
     if (names.size < MAX_ENTRIES_PER_KIND && extname(file) === '.md') {
-      names.add(frontmatterName(await readPluginMetadataFile(file)) ?? basename(file, '.md'))
+      names.add(frontmatterName(await fs.readText(file)) ?? basename(file, '.md'))
     }
   }
   for (const path of paths) {
-    if (await isDirectory(path)) {
-      for (const entry of await entriesOf(path)) {
-        if (entry.isFile()) {
+    if (await isDirectory(fs, path)) {
+      for (const entry of await fs.readdir(path)) {
+        if (entry.isFile) {
           await add(join(path, entry.name))
         }
       }
@@ -96,24 +86,25 @@ async function readAgents(paths: readonly string[]): Promise<string[]> {
 }
 
 // A command in a subfolder is `<folder>:<name>`, as Claude names nested commands.
-async function readCommands(paths: readonly string[]): Promise<string[]> {
+async function readCommands(fs: PluginFolderFs, paths: readonly string[]): Promise<string[]> {
+  const { basename, extname, join } = fs.path
   const names = new Set<string>()
   const walk = async (dir: string, prefix: string[], depth: number): Promise<void> => {
-    for (const entry of await entriesOf(dir)) {
+    for (const entry of await fs.readdir(dir)) {
       if (names.size >= MAX_ENTRIES_PER_KIND) {
         return
       }
-      if (entry.isDirectory() && depth < MAX_COMMAND_DEPTH) {
+      if (entry.isDirectory && depth < MAX_COMMAND_DEPTH) {
         await walk(join(dir, entry.name), [...prefix, entry.name], depth + 1)
-      } else if (entry.isFile() && extname(entry.name) === '.md') {
+      } else if (entry.isFile && extname(entry.name) === '.md') {
         names.add([...prefix, basename(entry.name, '.md')].join(':'))
       }
     }
   }
   for (const path of paths) {
-    if (await isDirectory(path)) {
+    if (await isDirectory(fs, path)) {
       await walk(path, [], 0)
-    } else if (extname(path) === '.md' && (await stat(path).catch(() => null))) {
+    } else if (extname(path) === '.md' && (await fs.stat(path))) {
       names.add(basename(path, '.md'))
     }
   }
@@ -132,31 +123,41 @@ export function mcpServerNames(config: Record<string, unknown> | null): string[]
     .sort()
 }
 
-async function readMcpServers(root: string, manifest: Record<string, unknown> | null) {
+async function readMcpServers(
+  fs: PluginFolderFs,
+  root: string,
+  manifest: Record<string, unknown> | null
+) {
   const declared = manifest?.mcpServers
   if (declared && typeof declared === 'object' && !Array.isArray(declared)) {
     return mcpServerNames({ mcpServers: declared })
   }
   const files =
-    typeof declared === 'string' ? manifestPaths(root, declared) : [join(root, '.mcp.json')]
+    typeof declared === 'string'
+      ? manifestPaths(fs, root, declared)
+      : [fs.path.join(root, '.mcp.json')]
   const names = await Promise.all(
-    files.map(async (file) => mcpServerNames(parseJsonObject(await readPluginMetadataFile(file))))
+    files.map(async (file) => mcpServerNames(parseJsonObject(await fs.readText(file))))
   )
   return [...new Set(names.flat())].sort()
 }
 
-export async function readClaudePluginFolder(root: string): Promise<ClaudePluginFolderRead> {
-  if (!(await isDirectory(root))) {
+export async function readClaudePluginFolder(
+  root: string,
+  fs: PluginFolderFs = nativePluginFolderFs
+): Promise<ClaudePluginFolderRead> {
+  const { join } = fs.path
+  if (!(await isDirectory(fs, root))) {
     return { contents: EMPTY, manifest: null, problem: 'missing-folder' }
   }
   const manifestPath = join(root, '.claude-plugin', 'plugin.json')
-  const manifestText = await readPluginMetadataFile(manifestPath)
+  const manifestText = await fs.readText(manifestPath)
   const manifest = parseJsonObject(manifestText)
   const [skills, agents, commands, mcpServers] = await Promise.all([
-    readSkills([join(root, 'skills'), ...manifestPaths(root, manifest?.skills)]),
-    readAgents([join(root, 'agents'), ...manifestPaths(root, manifest?.agents)]),
-    readCommands([join(root, 'commands'), ...manifestPaths(root, manifest?.commands)]),
-    readMcpServers(root, manifest)
+    readSkills(fs, [join(root, 'skills'), ...manifestPaths(fs, root, manifest?.skills)]),
+    readAgents(fs, [join(root, 'agents'), ...manifestPaths(fs, root, manifest?.agents)]),
+    readCommands(fs, [join(root, 'commands'), ...manifestPaths(fs, root, manifest?.commands)]),
+    readMcpServers(fs, root, manifest)
   ])
   return {
     contents: { skills, agents, commands, mcpServers },
