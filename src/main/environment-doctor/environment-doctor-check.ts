@@ -34,6 +34,11 @@ export type EnvironmentDoctorDeps = {
   exists: (path: string) => Promise<boolean>
   isDirectory: (path: string) => Promise<boolean>
   freeBytes: (path: string) => Promise<number | null>
+  /** Raw JSON of the workstation target list, or null when none is configured (the group is then skipped). */
+  readWorkstationRequirements: () => Promise<string | null>
+  /** Entries of the PATH the probes run with. */
+  pathEntries: () => string[]
+  homeDir: string
   /** Runs scripts.setup the way Orca's setup runner does; only called with runSetup. */
   runSetupScript: (args: {
     worktreePath: string
@@ -82,7 +87,7 @@ export function check(
   id: string,
   status: EnvironmentDoctorCheckStatus,
   message: string,
-  extra: { remediation?: string } = {}
+  extra: { remediation?: string; fixCommand?: string[] } = {}
 ): EnvironmentDoctorCheck {
   return { id, category, status, message, ...extra }
 }
