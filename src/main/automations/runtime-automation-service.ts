@@ -7,6 +7,7 @@ import { tuiAgentDisplayName } from '../../shared/agent-launch/catalog/tui-agent
 import type { Store } from '../persistence/loading-store/store'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
 import { AutomationService } from './automation-service'
+import { createAutomationUsageLimitHold } from './dispatch/usage-limit-hold'
 import {
   createRunTerminalRetention,
   type RunTerminalRetention
@@ -40,8 +41,10 @@ export function createRuntimeAutomationService(input: {
   /** Only server processes execute remote_host_service schedules. */
   allowRemoteHostScheduling: boolean
   isHostQuitting?: () => boolean
+  /** Desktop only: where the account's current limits come from; a host without it never holds on usage. */
+  readRateLimits?: Parameters<typeof createAutomationUsageLimitHold>[0]
 }): AutomationService {
-  const { store, runtime, claudeUsage, codexUsage } = input
+  const { store, runtime, claudeUsage, codexUsage, readRateLimits } = input
   // Launch handles remain usable before pane-key lookup resolves.
   const launchedHandles = new Map<string, string>()
   const observer = createRuntimeAutomationRunTerminalObserver(runtime, {
@@ -56,6 +59,7 @@ export function createRuntimeAutomationService(input: {
   const service = new AutomationService(store, {
     claudeUsage,
     codexUsage,
+    usageLimitHoldUntil: createAutomationUsageLimitHold(readRateLimits),
     terminalObserver: {
       ...observer,
       resolveRunTerminal: (run) => {

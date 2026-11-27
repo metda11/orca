@@ -15,6 +15,7 @@ import type {
 } from '../launch/automation-launch'
 import type { AutomationLaunchContext } from './automation-launch-runner'
 import { AutomationDispatchRefusedError, runAutomationLaunch } from './automation-launch-runner'
+import { automationFolderBusy } from './automation-folder-lock'
 import type {
   AutomationRepoRunTarget,
   AutomationRunTargetResult
@@ -34,6 +35,7 @@ import {
   ORCAD_FENCED_AUTOMATION
 } from '../ownership/orcad-fenced-automation'
 import { AutomationDispatchCancelledError } from './automation-dispatch-cancelled-error'
+import { automationTriggerRunsPrecheck } from '../../../shared/automations/launch/automation-precheck'
 import { isTuiAgent } from '../../../shared/agent-launch/catalog/tui-agent-config'
 
 export { AutomationDispatchCancelledError }
@@ -57,7 +59,18 @@ type DispatchContext = Pick<
   resolveTarget(automation: Automation): AutomationRunTargetResult
   /** A claimed run skipped before launch; repeats of one refusal fold before the claim. */
   onRunRefused?(automation: Automation, error: string): void
+  /** When the agent's account is used up: the time its limit resets, else null. */
+  usageLimitHoldUntil(automation: Automation): Promise<number | null>
+  /** Keeps a run pending and launches it again once the hold ends. */
+  holdRun(
+    automation: Automation,
+    run: AutomationRun,
+    target: AutomationRunTargetResult,
+    hold: AutomationDispatchHold
+  ): void
 }
+
+export type AutomationDispatchHold = { kind: 'usage-limit'; retryAt: number } | { kind: 'folder' }
 
 function definition(automation: Automation) {
   const { lastRunAt: _last, updatedAt: _updated, nextRunAt: _next, ...configured } = automation
@@ -132,6 +145,11 @@ export async function requestAutomationDispatch(
     await ctx.store.flushPendingOrThrowAsync({ drainToStableGeneration: false })
     return current
   }
+  // The pending row is the queue entry; the owner of the hold launches it again when the wait ends.
+  const holdPendingRun = (hold: AutomationDispatchHold) => {
+    ctx.holdRun(automation, run, expectedTarget, hold)
+    return returnDurable(run)
+  }
 
   run = readRun()
   if (run.status !== 'pending') {
@@ -156,6 +174,26 @@ export async function requestAutomationDispatch(
     run.trigger === 'scheduled' ? await describeStoppedWslDistroRefusal(ctx.store, target) : null
   if (stopped) {
     return refuse(stopped)
+  }
+  // An exhausted account would fail the agent at its first prompt, so the run waits for the reset.
+  const resetAt = await ctx.usageLimitHoldUntil(automation)
+  if (resetAt !== null) {
+    return holdPendingRun({ kind: 'usage-limit', retryAt: resetAt })
+  }
+  run = readRun()
+  if (run.status !== 'pending') {
+    return returnDurable(run)
+  }
+  // No await between this check and the claim, so two runs cannot both take a free folder.
+  if (
+    automationFolderBusy({
+      automations: ctx.store.listAutomations(),
+      runs: ctx.store.listAutomationRuns(),
+      automation,
+      runId: run.id
+    })
+  ) {
+    return holdPendingRun({ kind: 'folder' })
   }
   await ctx.runs.updateRun({
     runId: run.id,
@@ -263,7 +301,7 @@ export async function runAutomationRequestPrecheck(
   if (!run) {
     throw new Error('Automation run not found.')
   }
-  if (run.trigger !== 'scheduled' || !automation.precheck) {
+  if (!automation.precheck || !automationTriggerRunsPrecheck(run.trigger)) {
     return null
   }
   const target = resolveTarget(automation)

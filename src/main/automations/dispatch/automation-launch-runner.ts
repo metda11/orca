@@ -5,8 +5,10 @@ import type {
   AutomationRun
 } from '../../../shared/automations/history/automation-run'
 import {
-  didAutomationPrecheckPass,
-  formatAutomationPrecheckFailure
+  automationTriggerRunsPrecheck,
+  formatAutomationPrecheckFailure,
+  formatAutomationPrecheckSkip,
+  getAutomationPrecheckOutcome
 } from '../../../shared/automations/launch/automation-precheck'
 import type { AutomationMainLauncher, AutomationLaunch } from '../launch/automation-launch'
 import { AutomationRunLaunchError } from '../launch/automation-launch'
@@ -56,13 +58,19 @@ export async function runAutomationLaunch<Target extends RunTarget>(
 ): Promise<AutomationRun> {
   const { automation, run, target } = ctx
   const precheckResult =
-    run.trigger === 'scheduled' && automation.precheck ? await ctx.runPrecheck() : null
-  if (precheckResult && !didAutomationPrecheckPass(precheckResult)) {
+    automation.precheck && automationTriggerRunsPrecheck(run.trigger)
+      ? await ctx.runPrecheck()
+      : null
+  const precheckOutcome = precheckResult ? getAutomationPrecheckOutcome(precheckResult) : 'pass'
+  if (precheckResult && precheckOutcome !== 'pass') {
     return ctx.transition({
-      status: 'skipped_precheck',
+      status: precheckOutcome === 'skip' ? 'skipped_precheck' : 'dispatch_failed',
       workspaceId: automation.workspaceId,
       precheckResult,
-      error: formatAutomationPrecheckFailure(precheckResult)
+      error:
+        precheckOutcome === 'skip'
+          ? formatAutomationPrecheckSkip(precheckResult)
+          : formatAutomationPrecheckFailure(precheckResult)
     }).run
   }
   let launch: AutomationLaunch

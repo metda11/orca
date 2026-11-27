@@ -40,7 +40,7 @@ When you omit both target flags, Orca resolves the enclosing worktree from the c
 
 ## Precheck before a scheduled run
 
-Use `--precheck <command>` to run a shell command only before scheduled runs. Exit code `0` continues; any other exit, error, or timeout skips the run. Set the time limit with `--precheck-timeout <seconds>` (default `60`). Skips appear in Orca run history and `orca automations runs --id <automationId> --json` with status `skipped_precheck`.
+Use `--precheck <command>` to run a shell command before scheduled and manual runs. Exit code `0` starts the run; exit code `1` skips it, and the first line the command printed becomes the reason (status `skipped_precheck`); any other exit code, an error, or a timeout fails the run (status `dispatch_failed`). Set the time limit with `--precheck-timeout <seconds>` (default `60`). Both outcomes appear in Orca run history and `orca automations runs --id <automationId> --json` with the precheck result.
 
 ```bash
 orca automations create \
@@ -145,7 +145,7 @@ Use `edit` to change the name, prompt, provider, target, schedule, or enabled st
 
 After creating an automation, trigger it manually to check the prompt and target before waiting for the next scheduled time:
 
-**Run now** in Orca and `orca automations run` intentionally bypass the precheck, so you can test the automation or override its scheduled condition.
+**Run now** in Orca and `orca automations run` run the precheck too, so a manual run cannot start an agent the scheduled condition would have declined.
 
 ```bash
 orca automations run <automationId> --json
