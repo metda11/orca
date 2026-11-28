@@ -148,6 +148,8 @@ export type PendingVmEnvironmentCheck = {
   /** `skipped`: the VM's server predates the checks. */
   status: 'running' | 'passed' | 'skipped' | 'failed'
   checks?: readonly EnvironmentDoctorCheck[]
+  /** Where the checks ran, so a fix button can ask the same VM server to repair a check. */
+  target?: { environmentId: string; path: string }
 }
 
 /** Session-only creation status drives sidebar/panel and vanishes on reload; completed worktrees reconcile normally. request owns display fields and retry intent so they cannot drift. */

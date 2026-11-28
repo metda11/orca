@@ -1,10 +1,11 @@
+import type { EnvironmentDoctorFixOutcome } from '../../shared/workspace-setup/environment-doctor/environment-doctor-types'
 import { isAllowedWorkstationFix } from '../../shared/workspace-setup/environment-doctor/workstation-requirements'
 import { runSafely, withOutputTail, type EnvironmentDoctorDeps } from './environment-doctor-check'
 import { checkWorkstation } from './environment-doctor-workstation'
 
 const FIX_TIMEOUT_MS = 10 * 60_000
 
-export type WorkstationFixOutcome = { ok: boolean; message: string }
+export type WorkstationFixOutcome = EnvironmentDoctorFixOutcome
 
 /** Runs the repair for one check id, re-validated against the allowlist right before spawning. */
 export async function runWorkstationFix(
