@@ -206,6 +206,7 @@
 2 src/main/claude/hooks/claude-profile-hook-target.ts
 1 src/main/claude/hooks/statusline-install.ts
 3 src/main/claude/hooks/windows-hook-files.ts
+1 src/main/claude/plugin-inventory/claude-plugin-inventory-wsl.ts # runWslProcess finds wsl.exe with one existsSync, like skill discovery's plugin metadata read
 2 src/main/claude/structured/claude-structured-session-adapter.ts
 2 src/main/claude/structured/launch/claude-structured-child-env.ts
 2 src/main/claude/structured/launch/claude-structured-launch-resolution.ts # claudeOwnServerNames: one config-file lookup per launch, only when the host list adds servers

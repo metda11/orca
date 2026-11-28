@@ -1,6 +1,6 @@
 // The Claude plugin inventory of one account and workspace: each installed plugin with what it
 // brings. Read from config files and plugin folders, never the CLI, so it is cheap and works on any host.
-import { readdir, stat } from 'node:fs/promises'
+import { stat } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { isAbsolute, join, resolve } from 'node:path'
 import { readPluginMetadataFile } from '../../skills/discovery/plugin-skill-metadata'
@@ -9,17 +9,14 @@ import {
   asRecord,
   parseJsonObject
 } from '../../../shared/workspace-setup/setup-script-import-parsers'
-import type {
-  ClaudePluginInventory,
-  ClaudePluginInventoryEntry
-} from '../../../shared/claude-plugins/claude-plugin-inventory'
+import type { ClaudePluginInventory } from '../../../shared/claude-plugins/claude-plugin-inventory'
 import {
-  qualifyClaudePluginDependencies,
-  resolveClaudePluginInventory,
   syncedAccountFolderName,
   type ClaudePluginInventorySources
 } from './claude-plugin-inventory-resolution'
-import { mcpServerNames, readClaudePluginFolder } from './claude-plugin-contents'
+import { nativePluginFolderFs } from './claude-plugin-folder-fs'
+import { assembleClaudePluginInventory } from './claude-plugin-inventory-assemble'
+import { readClaudePluginInventoryInWsl } from './claude-plugin-inventory-wsl'
 
 // Profile editor, preflight and context weight ask in bursts; plugin installs change rarely.
 const INVENTORY_TTL_MS = 30_000
@@ -33,6 +30,11 @@ export type ClaudePluginInventoryRequest = {
   accountHomePath: string | null
   cwd: string | null
   refresh?: boolean
+  /**
+   * The WSL distro the workspace runs in. Then `cwd` and `accountHomePath` are the distro's own
+   * (Linux) paths and everything is read inside the distro, never from this host's disk.
+   */
+  wslDistro?: string | null
 }
 
 // Claude keeps the global config beside the folder (`~/.claude.json`) only for the default folder.
@@ -100,8 +102,8 @@ async function readSources(
   const synced = syncedDir
     ? {
         manifest: await readPluginMetadataFile(join(syncedDir, 'manifest.json')),
-        folders: (await readdir(syncedDir, { withFileTypes: true }).catch(() => []))
-          .filter((entry) => entry.isDirectory())
+        folders: (await nativePluginFolderFs.readdir(syncedDir))
+          .filter((entry) => entry.isDirectory)
           .map((entry) => entry.name)
       }
     : null
@@ -114,44 +116,7 @@ async function readInventory(
   cwd: string | null
 ): Promise<ClaudePluginInventory> {
   const sources = await readSources(configDir, explicit, cwd)
-  const plugins = await Promise.all(
-    resolveClaudePluginInventory(sources, cwd).map(
-      async (plugin): Promise<ClaudePluginInventoryEntry> => {
-        // A directory marketplace's plugin runs from its source folder; the cache copy is the fallback.
-        const sourceRead = plugin.sourceFolder
-          ? await readClaudePluginFolder(plugin.sourceFolder)
-          : null
-        const folder =
-          sourceRead && sourceRead.problem !== 'missing-folder'
-            ? sourceRead
-            : await readClaudePluginFolder(plugin.installPath)
-        const manifest = folder.manifest
-        const manifestName =
-          typeof manifest?.name === 'string' && manifest.name ? manifest.name : null
-        const version =
-          plugin.version ?? (typeof manifest?.version === 'string' ? manifest.version : undefined)
-        return {
-          id: plugin.id,
-          name: manifestName ?? plugin.name,
-          marketplace: plugin.marketplace,
-          scope: plugin.scope,
-          enabled: plugin.enabled,
-          installPath: plugin.installPath,
-          ...(version ? { version } : {}),
-          ...(typeof manifest?.description === 'string'
-            ? { description: manifest.description }
-            : {}),
-          dependencies: qualifyClaudePluginDependencies(manifest?.dependencies, plugin.marketplace),
-          ...folder.contents,
-          ...(folder.problem ? { problem: folder.problem } : {})
-        }
-      }
-    )
-  )
-  const workspaceMcpServers = cwd
-    ? mcpServerNames(parseJsonObject(await readPluginMetadataFile(join(cwd, '.mcp.json'))))
-    : []
-  return { configDir, cwd, plugins, workspaceMcpServers, readAt: Date.now() }
+  return assembleClaudePluginInventory({ sources, cwd, fs: nativePluginFolderFs })
 }
 
 // The org sync swaps `~gN` folders while Claude runs; an inventory naming a vanished folder is stale.
@@ -173,16 +138,26 @@ async function foldersStillPresent(inventory: ClaudePluginInventory): Promise<bo
 export async function readClaudePluginInventory(
   request: ClaudePluginInventoryRequest
 ): Promise<ClaudePluginInventory> {
-  const { configDir, explicit } = accountConfigDir(request.accountHomePath)
-  const key = JSON.stringify([configDir, explicit, request.cwd])
+  const wslDistro = request.wslDistro?.trim() || null
+  // A distro's folders are Linux paths, so this host cannot stat them; its entry lives for the TTL.
+  const { configDir, explicit } = wslDistro
+    ? { configDir: request.accountHomePath ?? '', explicit: Boolean(request.accountHomePath) }
+    : accountConfigDir(request.accountHomePath)
+  const key = JSON.stringify([wslDistro?.toLowerCase() ?? null, configDir, explicit, request.cwd])
   const cached = cache.get(key)
   if (cached && !request.refresh && Date.now() - cached.at < INVENTORY_TTL_MS) {
     const inventory = await cached.promise.catch(() => null)
-    if (inventory && (await foldersStillPresent(inventory))) {
+    if (inventory && (wslDistro || (await foldersStillPresent(inventory)))) {
       return inventory
     }
   }
-  const promise = readInventory(configDir, explicit, request.cwd)
+  const promise = wslDistro
+    ? readClaudePluginInventoryInWsl({
+        distro: wslDistro,
+        accountHomePath: request.accountHomePath,
+        cwd: request.cwd
+      })
+    : readInventory(configDir, explicit, request.cwd)
   cache.delete(key)
   cache.set(key, { promise, at: Date.now() })
   for (const oldest of cache.keys()) {
