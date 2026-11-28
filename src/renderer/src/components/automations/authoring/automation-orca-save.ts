@@ -23,6 +23,7 @@ import {
   dispatchAutomationReread,
   type AutomationDispatchResult
 } from '../hosts/automation-row-action-dispatch'
+import { automationAgentUpdate } from './automation-agent-profile-field'
 import { buildDraftPrecheck, buildDraftSchedule } from './automation-draft-model'
 import { buildAutomationRunContextForRepo } from './automation-run-context'
 import { resolveAutomationSetupDecisionForSave } from './automation-setup-decision'
@@ -93,7 +94,6 @@ export async function saveOrcaAutomation(
     !draftAtOpen || draft[key] !== draftAtOpen[key]
   const targetEdited = !currentAutomation || local.targetEdited
   const scheduleEdited = (['preset', 'time', 'dayOfWeek', 'customSchedule'] as const).some(edited)
-  const timezone = currentAutomation?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone
   const { rrule, missedRunGraceMinutes } = buildDraftSchedule(draft, time)
   const precheck = buildDraftPrecheck(draft)
   const recordedContext =
@@ -191,7 +191,7 @@ export async function saveOrcaAutomation(
     ...(edited('name') ? { name: draft.name } : {}),
     ...(edited('prompt') ? { prompt: draft.prompt } : {}),
     ...(edited('precheckCommand') || edited('precheckTimeoutSeconds') ? { precheck } : {}),
-    ...(edited('agentId') ? { agentId: draft.agentId } : {}),
+    ...automationAgentUpdate(draft, surface, currentAutomation, edited('agentId')),
     ...(!currentAutomation ||
     draft.launchSetupPatch ||
     edited('surface') ||
@@ -236,7 +236,7 @@ export async function saveOrcaAutomation(
     reuseSession: currentAutomation
       ? currentAutomation.reuseSession
       : draft.workspaceMode === 'existing' && draft.reuseSession,
-    timezone,
+    timezone: currentAutomation?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
     rrule: currentAutomation ? currentAutomation.rrule : rrule,
     dtstart: currentAutomation ? currentAutomation.dtstart : (updates.dtstart ?? time.now),
     missedRunGraceMinutes: currentAutomation

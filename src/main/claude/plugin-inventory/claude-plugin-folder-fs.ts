@@ -2,6 +2,7 @@
 // disk and on a snapshot taken inside a WSL distro (where Windows path semantics would be wrong).
 import { readdir, stat } from 'node:fs/promises'
 import * as nodePath from 'node:path'
+import { join } from 'node:path'
 import { readPluginMetadataFile } from '../../skills/discovery/plugin-skill-metadata'
 
 export type PluginFolderEntry = { name: string; isDirectory: boolean; isFile: boolean }
@@ -28,11 +29,20 @@ export const nativePluginFolderFs: PluginFolderFs = {
   readdir: (path) =>
     readdir(path, { withFileTypes: true }).then(
       (entries) =>
-        entries.map((entry) => ({
-          name: entry.name,
-          isDirectory: entry.isDirectory(),
-          isFile: entry.isFile()
-        })),
+        // Claude follows links (measured: a linked skill folder loads), but a Dirent reports a link
+        // as neither folder nor file (on Windows a junction too), so resolve its target.
+        Promise.all(
+          entries.map(async (entry) => {
+            const target = entry.isSymbolicLink()
+              ? await stat(join(path, entry.name)).catch(() => null)
+              : entry
+            return {
+              name: entry.name,
+              isDirectory: target?.isDirectory() === true,
+              isFile: target?.isFile() === true
+            }
+          })
+        ),
       () => []
     )
 }
