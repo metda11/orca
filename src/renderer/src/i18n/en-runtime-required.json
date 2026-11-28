@@ -30,11 +30,18 @@
     "toastUpdating_other": "Updating {{current}} of {{count}} CLIs"
   },
   "agentLaunch": {
+    "checkSettings": "Check the agent’s launch settings, then try again.",
+    "connectSsh": "Connect to this workspace’s SSH host, then try again.",
+    "invalidArgs": "The CLI arguments for {{value0}} have an unclosed quote. Fix them, then try again.",
     "opencode": {
       "invalidConfig": "OpenCode could not apply this model choice to the launch configuration. Check the OpenCode launch configuration and try again, or omit the model choice.",
       "unsupportedLaunch": "OpenCode cannot apply this model choice to this launch. Start a fresh local terminal with supported launch arguments, or omit the model choice.",
       "updateRequired": "OpenCode cannot safely start with a chosen model on this version. Update OpenCode to a supported release, or omit the model choice."
-    }
+    },
+    "reconnectServer": "Reconnect to this workspace’s Orca server, then try again.",
+    "sshUnavailable": "Terminal launch is unavailable on this SSH host. Open a terminal in the workspace and start the agent there.",
+    "terminalPromptFailed": "Orca opened a terminal for {{value0}}, but could not pass it your prompt. Send the prompt in that terminal.",
+    "updateServer": "Update Orca on this workspace’s server, then try again."
   },
   "aiVault": {
     "scanIssues": {
@@ -80,6 +87,122 @@
         "approvalsRemaining_one": "{{count}} approval remaining",
         "approvalsRemaining_other": "{{count}} approvals remaining"
       },
+      "JiraIssueWorkspace": {
+        "0b6b5646ed": "Unassigned",
+        "0cc62bd690": "Copy prompt",
+        "0f3c07a901": "backend, bug",
+        "38839801e8": "Copy key",
+        "444865b4a8": "Title",
+        "5cd09beaf9": "Retry",
+        "666cfdd835": "Unknown",
+        "69da9a208c": "Open in Jira",
+        "779bb91ee0": "Copy URL",
+        "80efa101c5": "Copy suggested branch name",
+        "857bd2f88f": "Preview, edit, and start work from the selected issue.",
+        "9178090e26": "No comments yet.",
+        "9a980b06b9": "Comments",
+        "a585fd204e": "Add a Jira comment...",
+        "aee97b6913": "Labels",
+        "b0b92666c9": "Comment",
+        "c4889a47e4": "No description provided.",
+        "commentTooLarge": "Comment is too large to submit safely.",
+        "ea21952aa3": "Failed to update Jira issue.",
+        "ef21405c6d": "Jira issue",
+        "fa132c8aed": "Failed to add comment."
+      },
+      "LinearIssueMarkdownDescriptionEditor": {
+        "28fd951b83": "Strike",
+        "340160f4e8": "Remove link",
+        "4f2fddc2b7": "No description provided.",
+        "5666b4493d": "Italic",
+        "5c16ec8f14": "Link URL",
+        "632096eb1c": "Link",
+        "68a41d5665": "Body text",
+        "7c52151156": "Issue description formatting",
+        "9eaf02ac01": "Quote",
+        "a7301a11f3": "save",
+        "ad1869bd54": "Inline code",
+        "c82917e06e": "Bullet list",
+        "caa88f50d0": "Bold",
+        "d6b2f3d35b": "Numbered list",
+        "d9c47069ef": "Markdown",
+        "dddaa7a0a6": "Heading 2",
+        "e2a0267c8c": "Checklist",
+        "e3f741d258": "Heading 1"
+      },
+      "LinearIssueTextEditor": {
+        "04d73b72dc": "Issue title",
+        "1e08a1ec80": "Title is required",
+        "947ba2d6f4": "to save"
+      },
+      "LinearIssueWorkspace": {
+        "30a7f56c0a": "Start workspace from issue",
+        "30c1242f3a": "Copy identifier",
+        "38b80780c2": "Failed to load projects",
+        "42589845bc": "Create",
+        "519c3587f3": "Add to project",
+        "543970c87a": "Activity",
+        "5d670ec8dc": "Copy suggested branch name",
+        "61f424f8ca": "Linear issue",
+        "65239a714b": "Linear",
+        "76ffd3c937": "Search for a project to add.",
+        "7a4997d8bb": "Close Linear issue preview",
+        "8b5b593053": "Failed to update project",
+        "8c55d6696a": "Add sub-issues",
+        "937ba6ad9a": "Loading projects",
+        "97c19a84f1": "Copy Linear URL",
+        "9a1317cdd3": "Failed to load sub-issue",
+        "9a9a884236": "Copy URL",
+        "ad5dec37b7": "Preview, edit, and start work from the selected issue.",
+        "aeed19d003": "Created {{value0}}",
+        "b0eac92d85": "Retry",
+        "b25e453c9d": "Failed to create sub-issue",
+        "b51276c8d6": "Project",
+        "c11b4e3cc2": "No projects found.",
+        "c182e02de5": "Sub-issue title",
+        "c23e79e5c0": "Actions",
+        "ca8778c124": "Unknown",
+        "db3f269d98": "Search projects",
+        "df4c86ed12": "Close",
+        "e1e0a9bca9": "Start workspace",
+        "f63ef94ea8": "Issues",
+        "f6c6381593": "Copy prompt",
+        "f9d4ef9807": "Project updated",
+        "issueDescriptionLabel": "Issue description",
+        "moreWorkspaceActions": "More issue workspace actions",
+        "namedUserUpdatedIssue": "{{name}} updated the issue · {{time}}",
+        "noWorkspaceYet": "None yet",
+        "openAttachedWorkspace": "Open workspace attached to issue",
+        "openOnLinear": "Open on Linear",
+        "openWorkspace": "Open workspace",
+        "someoneUpdatedIssue": "Someone updated the issue · {{time}}",
+        "startNewWorkspace": "Start new workspace",
+        "workspaceSection": "Workspace"
+      },
+      "LinearItemDrawer": {
+        "0be31fef8e": "Estimate must be a non-negative integer",
+        "23886c7eec": "Add label",
+        "2820f0f0f0": "Leave a comment...",
+        "2fcff829a8": "Add a comment…",
+        "367f828482": "No labels found",
+        "59b6cd3706": "Loading states",
+        "64bfffc4dd": "Labels",
+        "6ab35eafd5": "Failed to add comment",
+        "780ea6ed89": "No states found",
+        "7f7b89b631": "Labels: {{value0}}",
+        "b2376d0179": "Loading members",
+        "b5675b0694": "Save",
+        "cddd9b04a7": "Loading labels",
+        "ceeb8c6153": "Clear",
+        "commentTooLarge": "Comment is too large to submit safely.",
+        "d369841269": "Send comment",
+        "d71cd3003e": "+ Assignee",
+        "dd304de85a": "Properties",
+        "estimateValue": "Estimate {{estimate}}",
+        "fbb90300e2": "Custom estimate",
+        "fda549766e": "{{value0}} to comment",
+        "setEstimate": "Set estimate"
+      },
       "NativeChatResumeOnRestartModal": {
         "activityMonitorCount_one": "Monitoring {{count}} background task",
         "activityMonitorCount_other": "Monitoring {{count}} background tasks",
@@ -111,10 +234,96 @@
         "filesFound_other": "{{count}} files found"
       },
       "TaskPage": {
+        "02f67c0d09": "New Project",
+        "0506a78337": "This will update the pull request on GitHub.",
+        "09623359b9": "Start date",
+        "0aa8525950": "Model",
+        "0b9b04f4b5": "Type or choose a user",
+        "0f7b0d964a": "Creates a new issue in {{value0}}.",
+        "1742eafc14": "No Project",
+        "1a9ea003dc": "Failed to disable auto-merge",
+        "1b59a07674": "Creating...",
+        "1e1b2ad8f2": "Select a team from the project workspace before filing this issue.",
+        "1f0fce91e3": "Select {{value0}}",
+        "2ea1c701b6": "Target date",
+        "34da8ac06c": "Lead",
+        "37d60046e3": "Open GitHub merge box",
+        "3ace2e6bcf": "Suggestions",
+        "3ca9b424a3": "Failed to create project.",
+        "40eaf2c27c": "Details",
+        "4f3cb99f41": "Switch Team",
+        "5301ca0f20": "Create project",
+        "56cdb413a2": "Comma-separated values",
+        "579f98afcd": "Add a short summary...",
+        "5af6f0ae5b": "Select team",
+        "5d4fd69a6a": "Recently active in this pull request",
+        "62c7bd789f": "Request up to 15 reviewers",
+        "67755a83a1": "Everyone else",
+        "6775c05483": "Failed to update Linear state",
+        "733b8f2421": "Linear / Views",
+        "745ae567d4": "\"{{value0}}\" is not available for {{value1}}",
+        "7d63e2626e": "Loading...",
+        "7da41c9225": "Target",
+        "837bb901ec": "Reviewers removed",
+        "88f478cdef": "Failed to merge pull request",
+        "8a07f21e76": "Health",
+        "8a22eb3f7b": "No matching reviewers.",
+        "8f06dbb9e5": "Reviewer requested",
+        "919a20dd5b": "Enter {{value0}}",
+        "93c57f15e5": "No projects found.",
+        "969e26577c": "You can request up to 15 reviewers",
+        "995dd6af9b": "Open PR checks",
+        "9bc8aea407": "Add description...",
+        "9e03c17847": "Open the PR details to view current reviewers.",
+        "a04fe7ba73": "Visibility",
+        "a161925adc": "Pull request merged",
+        "a3318684bc": "Failed to enable auto-merge",
+        "a5bf86defe": "Auto-merge disabled",
+        "ae592fee62": "Issue type",
+        "aec5feeb69": "Failed to create Jira issue.",
+        "af2a8371de": "Failed to load Jira issue types.",
+        "af9e877f30": "No labels",
+        "afc68824ff": "No states found",
+        "b4e10f096e": "Owner",
+        "b6795e65fd": "Close",
+        "bc06ed0fb0": "Back to views",
+        "bdebffcbfe": "Create a Linear project for the selected team.",
+        "c11105dac5": "New Issue",
+        "cb98f0350c": "Created {{value0}}",
+        "cbcdcbe244": "Loading required Jira fields…",
+        "cc13109b5d": "Loading states",
+        "cf72580c04": "Write a description, project brief, or collect ideas...",
+        "cfaadb6b22": "No lead",
+        "cfb56a7868": "Search projects...",
         "changedFileCount_one": "{{count}} file",
         "changedFileCount_other": "{{count}} files",
+        "d00571d9b1": "Enter a reviewer",
+        "d45a910c4a": "Change Linear state from {{value0}}",
+        "d6cda23ef1": "Members",
+        "d7f16d0e32": "Select Team",
+        "d9151fd4e9": "Issue title",
+        "dc67f69962": "Failed to request reviewer",
+        "e178c0a953": "Choose a Jira project before creating the issue.",
+        "ecbcc83140": "Project name",
+        "ed1daeb49a": "Failed to remove reviewer",
+        "editReviewersWithCurrent": "Edit reviewers: {{value0}}",
+        "f161bf9ede": "Description (optional)",
+        "f9191d1714": "Reviewer removed",
+        "fed317634c": "Auto-merge enabled",
+        "groupUnassigned": "Unassigned",
+        "jiraBoardEmptyColumn": "No issues",
+        "jiraColumnOriginalEstimate": "Estimate",
+        "jiraColumnParent": "Parent",
+        "jiraColumnRemainingEstimate": "Remaining",
+        "jiraColumnSprint": "Sprint",
+        "jiraColumnStoryPoints": "Points",
+        "jiraColumnsPicker": "Columns",
+        "jiraTextMatchesNotice": "Showing text matches. Jira couldn't run this search as JQL.",
         "labelCount_one": "{{count}} label",
         "labelCount_other": "{{count}} labels",
+        "linearHasWorktreeLoadFailed": "Unable to load Linear issues linked to an Orca workspace.",
+        "linearHasWorktreePartialLoadFailed": "Some Linear issues linked to an Orca workspace could not be loaded. Refresh to try again.",
+        "linearProjectPlaceholder": "Project",
         "memberCount_one": "{{count}} member",
         "memberCount_other": "{{count}} members",
         "projectsFailedToLoad_one": "{{failed}} of {{count}} project failed to load",
@@ -358,10 +567,82 @@
         "moreHosts_one": "{{count}} more host. Search by name to find it.",
         "moreHosts_other": "{{count}} more hosts. Search by name to find one."
       },
+      "issueComments": {
+        "you": "You"
+      },
+      "jiraIssue": {
+        "loadCommentsFailed": "Failed to load comments.",
+        "loadStatusChangesFailed": "Failed to load status changes."
+      },
+      "linear-issue-attribute-filter-coverage-notice": {
+        "labelsAtIdLimit": "Filtering the most this can carry: {{value0}} team labels. Rows picked past that are left out.",
+        "labelsPartialTeamCoverage": "Filtering {{value0}} of {{value1}} team labels — issues from the remaining teams are not included.",
+        "statusAtIdLimit": "Filtering the most this can carry: {{value0}} team statuses. Rows picked past that are left out.",
+        "statusPartialTeamCoverage": "Filtering {{value0}} of {{value1}} team statuses — issues from the remaining teams are not included."
+      },
+      "linear-issue-attribute-filter-sections": {
+        "assignee": "Assignee",
+        "back": "Back",
+        "countSelected": "{{count}} selected",
+        "labels": "Labels",
+        "partialCoverageMarker": "· partial",
+        "priority": "Priority",
+        "searchAssignee": "Filter assignee…",
+        "searchLabels": "Filter labels…",
+        "searchPriority": "Filter priority…",
+        "searchStatus": "Filter status…",
+        "selected": "selected",
+        "status": "Status"
+      },
       "linear": {
+        "priority": {
+          "icon": {
+            "priorityValue": "Priority: {{label}}"
+          }
+        },
         "project": {
           "view": {
             "surfaces": {
+              "0a6a5a7dd6": "Latest update",
+              "111bef9aa8": "Lead",
+              "1748d3b9af": "Labels",
+              "20b9d09b7d": "Unknown",
+              "25a2196732": "Target",
+              "27d91cb1a6": "Shared",
+              "30402d2c6e": "Try search or refresh.",
+              "3be47aed6f": "Priority",
+              "3fb6473111": "Start",
+              "563501f191": "Progress",
+              "5d99315fb8": "Planning",
+              "5f79bc76b0": "Back to projects",
+              "65bda65159": "Members",
+              "7616c986c6": "Open {{value0}} issues",
+              "7b147907dc": "Linear",
+              "85607ff793": "Project",
+              "8bbecb2510": "None",
+              "906b5e4cb8": "Linear / Projects / {{value0}}",
+              "93e1f6bfca": "Loading",
+              "9ddb58edbd": "Status",
+              "9f0f51fd9e": "Create or save views in Linear, then refresh.",
+              "a2f31c4cd6": "No Linear projects found",
+              "a9785c7158": "Refresh",
+              "aac9a4afc6": "Open in Linear",
+              "backlog": "Backlog",
+              "bb1405eff8": "Milestones",
+              "bb5664d456": "No project description.",
+              "c0a50f96a4": "Unable to load views",
+              "c5f79616c3": "Teams",
+              "c8db98b73b": "Resources",
+              "c9b6e9f90d": "Unable to load Linear projects",
+              "e1fa97d21d": "Select a project to view its overview.",
+              "ee3d2caabd": "Issues",
+              "ef90b21366": "No views found",
+              "f059181bd9": "Private",
+              "f2cc1e0ff6": "Linear / Projects",
+              "f4c79cff5f": "Review the workspace error below, then refresh.",
+              "f5ef24cf46": "Health",
+              "linearLoginUnreadable": "Unable to read saved Linear login. Reconnect it in Settings.",
+              "openInLinear": "Open {{value0}} in Linear",
               "scopedIssueCount_one": "{{count}} scoped issue",
               "scopedIssueCount_other": "{{count}} scoped issues"
             }
@@ -404,6 +685,8 @@
       "right": {
         "sidebar": {
           "AiVaultPanel": {
+            "prepareSessionResumeFailed": "Could not prepare this session for resume.",
+            "resumeInNewCliHostTooOld": "Update Orca on the host that runs this chat to resume it in a new CLI.",
             "transcriptsSkippedCount_one": "{{count}} transcript skipped",
             "transcriptsSkippedCount_other": "{{count}} transcripts skipped"
           },
@@ -1259,6 +1542,23 @@
         }
       },
       "task": {
+        "page": {
+          "hooks": {
+            "use": {
+              "task": {
+                "page": {
+                  "jira": {
+                    "create": {
+                      "dialog": {
+                        "jiraRequiredFieldsLoadFailed": "Failed to load required Jira fields."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "project": {
           "source": {
             "combobox": {
@@ -1268,6 +1568,23 @@
             }
           }
         }
+      },
+      "taskPageJiraBoard": {
+        "changeStatusFailed": "Failed to change status."
+      },
+      "taskPageJiraLinkedIssues": {
+        "someIssuesFailed": "Some Jira issues linked to workspaces could not be loaded. Refresh to try again."
+      },
+      "taskPageJiraLoadState": {
+        "accessDenied": "Jira denied access to this issue search. Check project permissions or try a different JQL query.",
+        "authFailed": "Jira authentication failed. Reconnect Jira in Settings, then try again.",
+        "errorWithCode": "Error {{code}}: {{summary}}",
+        "failedToLoadIssues": "Failed to load Jira issues.",
+        "jqlFailed": "Jira couldn't run this JQL query. Check the syntax and try again.",
+        "loadFailed": "Couldn't load Jira issues. Try again in a moment.",
+        "rateLimited": "Jira rate-limited this issue search. Try again in a moment.",
+        "serverError": "Jira had a server error while loading issues. Try again in a moment.",
+        "unreachable": "Couldn't reach Jira. Check your connection and try again."
       },
       "taskSourceContextSummary": {
         "projectCount_one": "{{count}} project",
@@ -1286,11 +1603,65 @@
             "ptyAllocationLimit": "Your system cannot allocate any more pty devices. Close some terminals you are not using, in Orca or another program, then try again.",
             "terminalProcessLimit": "Your system cannot start another terminal process. Close unused terminals or quit unused processes, then try again."
           },
+          "TerminalLinkActionPopover": {
+            "download": "Download…",
+            "downloadAlreadyLocal": "'{{value0}}' is already on this computer.",
+            "downloadFolderUnsupported": "Folder '{{value0}}' can't be downloaded from this host.",
+            "downloadOpenFailed": "Failed to download '{{value0}}'.",
+            "downloadOpenWithDefaultApp": "Download & open with default app",
+            "openFile": "Open file",
+            "openFolder": "Open folder",
+            "openInFinder": "Open in Finder",
+            "openTaskTerminal": "Open task terminal",
+            "openWithDefaultApp": "Open with default app",
+            "switchTerminal": "Switch terminal",
+            "switchWorkspace": "Switch workspace"
+          },
+          "TerminalRemoteRuntimeReconnectBanner": {
+            "disconnectedBody": "Automatic retries stopped. Reconnect to resume this terminal session.",
+            "disconnectedTitle": "Remote runtime disconnected",
+            "pairingRefusedBody": "Orca couldn't pair with it again over SSH. Nothing on the host was stopped. Reconnect to try again.",
+            "pairingRefusedTitle": "This host no longer accepts this computer",
+            "reconnectButton": "Reconnect",
+            "serverReplacedBody": "Orca connects to the host as a different SSH user, or its server was reinstalled, so reconnecting can’t restore this terminal. Forget this server in Settings, then connect the SSH host to pair with its current server.",
+            "serverReplacedButton": "Open server settings",
+            "serverReplacedTitle": "This host runs a different Orca server",
+            "signInBody": "This terminal continues by itself once you sign in to the host.",
+            "signInButton": "Sign in",
+            "signInTitle": "Waiting for SSH sign-in"
+          },
+          "TerminalSleepingPaneOverlay": {
+            "deadlineDetail": "The host was busy restoring other terminals. Your session is saved.",
+            "liveCapDetail": "Enough agents are already running on this host. Your session is saved.",
+            "pausedDetail": "Automatic restores are paused because the host stopped unexpectedly. Your session is saved.",
+            "pressureDetail": "The host is under heavy load. Your session is saved.",
+            "resume": "Resume",
+            "resumeAutomaticRestores": "Resume automatic restores",
+            "title": "Sleeping — click to resume"
+          },
+          "TerminalSshReconnectOverlay": {
+            "authFailed": "Authentication failed for {{value0}}. Connect again to continue this terminal session.",
+            "connectFailed": "SSH connection failed",
+            "connected": "SSH is connected.",
+            "connecting": "Connecting to {{value0}}. This terminal will resume after the host is available.",
+            "disconnected": "This terminal is waiting for {{value0}}. Connect to continue this SSH session.",
+            "reconnectFailed": "The SSH connection to {{value0}} failed. Connect again to continue this terminal session.",
+            "removeWorkspaceButton": "Remove workspace",
+            "removedBody": "The SSH host for this workspace was removed, so it can no longer connect. Remove the workspace to clear it — remote files are left untouched.",
+            "removedTitle": "SSH host removed",
+            "title": "SSH connection required"
+          },
+          "legacyRelayBridge": {
+            "unreachable": "This terminal is still running on the host under an older version of Orca. Reconnecting to it…"
+          },
           "terminal": {
             "drop": {
               "handler": {
                 "failedUploads_one": "Failed to upload {{count}} file.",
                 "failedUploads_other": "Failed to upload {{count}} files.",
+                "internalHostMismatch": "Drop files from the same host as this terminal.",
+                "internalPathsTooLarge": "Drop path list is too large for a safe terminal paste.",
+                "internalTooManyPaths": "Drop contains too many paths for a safe terminal paste.",
                 "skippedItems_one": "Skipped {{count}} item.",
                 "skippedItems_other": "Skipped {{count}} items.",
                 "skippedSymlinks_one": "Skipped {{count}} symlink.",
@@ -1298,9 +1669,27 @@
                 "uploadingFilesToRemote_one": "Uploading {{count}} file to remote…",
                 "uploadingFilesToRemote_other": "Uploading {{count}} files to remote…",
                 "uploadingFiles_one": "Uploading {{count}} file to runtime…",
-                "uploadingFiles_other": "Uploading {{count}} files to runtime…"
+                "uploadingFiles_other": "Uploading {{count}} files to runtime…",
+                "writeRejected": "File drop cancelled: terminal could not accept the path.",
+                "writeTimeout": "File drop cancelled: terminal did not accept the path before the safety timeout."
               }
             }
+          },
+          "zcode": {
+            "missing": {
+              "tui": {
+                "description": "Orca's hooks installed correctly — the zcode on your PATH just cannot open a session. The ZCode desktop app bundles the agent runtime without its terminal UI. Install a zcode that ships the TUI, then run zcode outside Orca to confirm.",
+                "title": "This ZCode build has no terminal UI"
+              }
+            }
+          }
+        }
+      },
+      "workspace": {
+        "cleanup": {
+          "backgroundRemoval": {
+            "skippedAncestor": "Skipped because a nested workspace could not be removed.",
+            "skippedPendingAncestor": "Skipped because a nested workspace has not finished removing."
           }
         }
       }
@@ -1318,6 +1707,11 @@
       }
     },
     "lib": {
+      "aiVaultResumeRefusal": {
+        "openInChat": "This {{value0}} conversation is open in a chat. Refresh Session History to open it.",
+        "ownershipUnknown": "Orca could not confirm who owns this {{value0}} conversation. Refresh Session History and try again.",
+        "preparationRefused": "Orca could not prepare this {{value0}} conversation. Start a new chat to continue."
+      },
       "cli": {
         "detail": {
           "devLauncherOnly": "Development mode uses a generated launcher for validation only.",
@@ -1344,6 +1738,13 @@
           "wslWindowsOnly": "WSL CLI registration is only available on Windows."
         }
       },
+      "codex": {
+        "session": {
+          "restart": {
+            "4bd4a3a9c7": "System default"
+          }
+        }
+      },
       "dropFailureReason": {
         "changed": "The file changed while it was uploading. Try again.",
         "disconnected": "The host is disconnected.",
@@ -1360,6 +1761,48 @@
       "emulator": {
         "androidSdkNotFound": "Android SDK not found. Install Android Studio and set ANDROID_HOME.",
         "xcodeSimulatorToolsUnavailable": "Xcode Simulator tools are unavailable. Install full Xcode, open it once, then select it with `sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer`."
+      },
+      "launch": {
+        "agent": {
+          "background": {
+            "session": {
+              "4ca0651d56": "Your automation prompt wasn't sent — open the workspace and paste it."
+            }
+          }
+        },
+        "work": {
+          "item": {
+            "direct": {
+              "19c7683acf": "The selected agent is unavailable. Check the workspace’s agent settings, then try again.",
+              "3de6371df3": "Could not build the agent launch command.",
+              "67e103dd60": "Workspace created but could not be activated.",
+              "8bc45efdbc": "Could not read the pull request. Check that you can open it, then try again.",
+              "agent": {
+                "ceeeb509b5": "Agent took too long to start. The workspace is ready — paste the {{value0}} when the agent is idle."
+              }
+            }
+          }
+        }
+      },
+      "nativeChatCliFork": {
+        "hostUnavailable": "The conversation host is unavailable.",
+        "noSavedConversation": "This chat has no saved conversation to copy.",
+        "preparationTimedOut": "Conversation preparation timed out.",
+        "sourceChanged": "The source chat changed before preparation."
+      },
+      "pr": {
+        "comment": {
+          "audience": {
+            "27ce73211c": "All",
+            "64deee36a9": "Bots",
+            "a7150a17bc": "Humans",
+            "empty": {
+              "all": "No comments yet.",
+              "bot": "No bot comments.",
+              "human": "No human comments."
+            }
+          }
+        }
       },
       "rateLimits": {
         "errors": {
@@ -1434,11 +1877,80 @@
           "wslCodexHomeUnavailable": "WSL Codex home unavailable for {{distro}}",
           "wslKimiHomeUnavailable": "WSL Kimi home unavailable for {{distro}}"
         }
+      },
+      "worktreePaletteEvidence": {
+        "createdByAutomation": "Created by automation",
+        "linkedIssue": "Linked issue",
+        "linkedTask": "Linked task",
+        "listeningPort": "Listening port",
+        "mergeRequest": "Merge request",
+        "pullRequest": "Pull request",
+        "workspaceComment": "Workspace comment"
       }
     },
     "runtime": {
       "githubCheckDetailsTimeout": {
         "timedOut": "Timed out loading check details."
+      },
+      "remoteTerminal": {
+        "connectionClosed": "Remote runtime connection closed.",
+        "streamClosed": "Remote terminal stream closed.",
+        "streamEnded": "Remote terminal stream ended."
+      }
+    },
+    "store": {
+      "pluginNewFile": {
+        "failed": "Couldn't create the file.",
+        "unavailable": "{{value0}} is no longer available. Turn its plugin back on."
+      },
+      "slices": {
+        "editor": {
+          "51f15c37d3": "Cannot open directory: {{value0}}",
+          "f2e00db373": "File not found: {{value0}}",
+          "gitOperationTarget": {
+            "unresolvedHost": "The workspace host is unresolved. Refresh the workspace and retry."
+          }
+        },
+        "sparse": {
+          "presets": {
+            "0696d13e56": "Preset saved",
+            "6ed7d6010a": "Failed to remove preset",
+            "811be06b57": "Failed to update preset",
+            "c96b770172": "Failed to save preset",
+            "e10f097822": "Preset updated",
+            "ee434d7941": "Preset removed",
+            "ef13e994e6": "Presets must load before saving."
+          }
+        },
+        "workspace": {
+          "cleanup": {
+            "hostCollision": "Error: this workspace exists on multiple hosts at the same path"
+          }
+        },
+        "worktrees": {
+          "0216895fb5": "Failed to delete branch",
+          "a17f4d2e93": "Could not update this workspace.",
+          "c6cf133786": "This workspace is no longer available.",
+          "metadata": {
+            "worktree": {
+              "meta": {
+                "persist": {
+                  "4367540861": "Update the remote runtime to link Linear issues",
+                  "877e3638d8": "Update the remote runtime to change this workspace’s linked issue",
+                  "dismissRenameError": "Update the remote runtime to dismiss auto-name errors",
+                  "github": {
+                    "pr": {
+                      "suppression": "Update the remote runtime to unlink GitHub pull requests"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "preservedBranchCleanupHostAmbiguous": "Multiple preserved branch cleanups are pending for \"{{value0}}\"; specify the host.",
+          "runtimeScopeForbiddenDescription": "Workspaces are unavailable on a mobile-scope pairing. Reconnect using the browser access link from Settings → Runtime Environments → Share this Orca server.",
+          "runtimeScopeForbiddenTitle": "This connection has limited (mobile) access"
+        }
       }
     }
   },
@@ -2466,10 +2978,57 @@
     }
   },
   "components": {
+    "JiraIssueWorkspace": {
+      "pendingChange": "Another issue change is in progress."
+    },
     "RepositoryBrowserProfileSection": {
       "keywordCookies": "cookies",
       "keywordProfile": "browser profile",
       "keywordSignIn": "sign in"
+    },
+    "agentNotes": {
+      "activeAgentNeedsPermission": "The active agent needs permission.",
+      "activeSubmitFailed": "The notes may already be pasted in the active terminal, but Orca could not submit them.",
+      "activeTerminalUnavailable": "Open the agent terminal in this worktree, then send the notes again.",
+      "approvalUnseen": "The {{target}} agent may be waiting for approval. Send the notes when its turn ends.",
+      "empty": "No notes to send.",
+      "hostUpdateRequired": "Update Orca on the {{target}} agent's host to send it notes.",
+      "notAgentSession": "The {{target}} terminal is not a recognized agent session.",
+      "notReady": "The {{target}} agent was not ready for input yet.",
+      "notWritable": "The {{target}} agent did not accept the notes.",
+      "notWritableSelection": "The {{target}} agent did not accept the selection.",
+      "selectedAgentNeedsPermission": "The selected agent needs permission.",
+      "selectedSubmitFailed": "The notes may already be pasted in the selected terminal, but Orca could not submit them.",
+      "selectedTerminalUnavailable": "The selected terminal is no longer available.",
+      "statusUnverified": "The {{target}} agent status could not be verified.",
+      "targetActive": "active",
+      "targetSelected": "selected"
+    },
+    "agentSessionContinuation": {
+      "agentDisabled": "{{agent}} is disabled in Agent settings.",
+      "agentUnavailable": "{{agent}} was not detected on this workspace host.",
+      "copyPrompt": "Copy prompt",
+      "deliveryFailed": "The new {{agent}} session started, but its context could not be sent.",
+      "deliveryUnconfirmed": "Orca could not confirm {{agent}} received the session context. Check the new session, and paste it yourself if its input is empty.",
+      "launchFailed": "Could not start a new {{agent}} session.",
+      "sent": "Session context sent to {{agent}} in a new session."
+    },
+    "jiraIssueAssigneeField": {
+      "assignToMe": "Assign to me ({{name}})",
+      "automatic": "Automatic",
+      "label": "Assignee"
+    },
+    "jiraIssueTitleField": {
+      "failed": "Failed to generate a summary from the description.",
+      "generate": "Generate title from description",
+      "generating": "Generating title. Click to stop.",
+      "stop": "Stop generating title"
+    },
+    "jiraUserPicker": {
+      "empty": "No users found",
+      "search": "Search users",
+      "select": "Select {{value0}}",
+      "useKnownId": "Use known user ID \"{{value0}}\""
     },
     "native-chat": {
       "approval": {
@@ -2733,6 +3292,7 @@
         "botCount_other": "{{count}} bots",
         "fileCount_one": "{{count}} file",
         "fileCount_other": "{{count}} files",
+        "optionUpdateFailed": "Could not update option",
         "placeholder": "Ask anything, @ to mention files, / for commands"
       },
       "composerErrors": {
@@ -2894,6 +3454,10 @@
         "settingsUnconfirmed": "Codex did not confirm the selected model and effort. This goal change was not sent. Check the chat and try again.",
         "stopUnconfirmed": "Codex could not confirm Stop. Check the chat before continuing."
       },
+      "hostOutage": {
+        "unverifiable": "Orca couldn't check whether {{distro}} is running"
+      },
+      "launchPromptNotDelivered": "Not delivered — check the terminal",
       "mcp": {
         "status": {
           "tools_one": "{{count}} tool",
@@ -2910,6 +3474,15 @@
         "noteChanged": "Note changed",
         "openMemory": "Open memory",
         "removed": "Removed"
+      },
+      "modelDescriptions": {
+        "fable": "Most capable for the hardest, longest-running tasks",
+        "grok_4_5": "An earlier xAI frontier model",
+        "grok_4_6": "xAI's previous frontier model",
+        "grok_4_7": "xAI's latest frontier model",
+        "haiku": "Fastest for quick answers",
+        "opus": "Best for everyday, complex tasks",
+        "sonnet": "Efficient for routine tasks"
       },
       "notices": {
         "compaction": "Context compacted",
@@ -2962,6 +3535,19 @@
         "resolved": "Resolved",
         "resolver": "Answered on {{device}}",
         "unavailable": "Selected answer unavailable"
+      },
+      "resumeInNewChat": {
+        "exitUnconfirmed": "{{agent}} is running this conversation in another terminal. Quit it there or close that terminal, then try again.",
+        "exitUnconfirmedFromTerminal": "{{agent}} is still running this conversation in this terminal. Quit {{agent}} here, then open this conversation from Session History."
+      },
+      "runtime": {
+        "readError": "Couldn't read agent chat from the remote runtime.",
+        "tooOld": "This remote runtime is too old to show agent chat history. Update the remote runtime to view it."
+      },
+      "sessionOption": {
+        "commandCanceled": "Chat UI command was canceled because the composer closed.",
+        "commandRejected": "The terminal did not accept the command.",
+        "noLiveTerminal": "No live terminal is available."
       },
       "sessionOptionErrors": {
         "afterStartOnly": "This option is only available after the session starts.",
@@ -3302,6 +3888,11 @@
         }
       }
     },
+    "toastFallbacks": {
+      "fileOwnerResolveFailed": "Failed to resolve file owner.",
+      "filesResolveDroppedFailed": "Failed to resolve dropped files.",
+      "filesUploadFailed": "Failed to upload files."
+    },
     "workspace": {
       "cleanup": {
         "browse": {
@@ -3360,6 +3951,9 @@
         }
       }
     }
+  },
+  "csv": {
+    "resizeColumn": "Resize column {{column}}"
   },
   "dashboard": {
     "sidebar": {
@@ -3442,9 +4036,65 @@
     }
   },
   "jira": {
+    "board": {
+      "cancel": "Cancel",
+      "chooseTransition": "Choose a status change:",
+      "moveDescription": "Jira controls which status changes are available and which fields they require.",
+      "moveIssue": "Move {{key}}",
+      "moveTitle": "Move {{key}} to {{column}}",
+      "noTransition": "No status change to {{column}} is available for {{key}}.",
+      "queryTooLong": "The Jira query is too long. Shorten the query or clear filters.",
+      "reorderColumn": "Reorder {{column}}",
+      "reorderColumnHint": "Issues in this lane: {{count}}. Use the Left and Right arrow keys to move it."
+    },
+    "copy": {
+      "actions": "Copy issue context",
+      "context": "Copy context for {{key}}"
+    },
+    "favourites": {
+      "applyFailed": "Could not apply the Jira favourite.",
+      "clearFailed": "Could not clear the saved filter. Retry after it finishes loading or saving.",
+      "loadFailed": "Could not load Jira favourites.",
+      "siteMismatch": "Choose a project from the favourite’s Jira site, or clear the project filter."
+    },
+    "prompt": {
+      "bug": "Investigate bug",
+      "custom": "Custom template",
+      "dialogTitle": "Copy prompt from template",
+      "implementation": "Start implementation",
+      "other": "Additional instructions (optional)",
+      "prSummary": "Draft PR summary",
+      "preview": "Preview",
+      "template": "Template",
+      "templateText": "Template text",
+      "testPlan": "Write test plan",
+      "variables": "Use $jira-issue for the issue context and $other-prompt for your additional instructions. Saved on this device."
+    },
+    "savedFilters": {
+      "loadFailed": "Could not load saved Jira filters.",
+      "saveFailed": "Could not save Jira filters."
+    },
+    "statusFilters": {
+      "loadFailed": "Could not load Jira status filters.",
+      "saveFailed": "Could not save Jira status filters."
+    },
+    "transitions": {
+      "apply": "Change status",
+      "back": "Back",
+      "changeStatus": "Change status: {{status}}",
+      "chooseResolution": "Choose a resolution",
+      "comment": "Comment",
+      "completeInJira": "Complete “{{name}}” in Jira",
+      "empty": "No status changes available.",
+      "loadError": "Could not load status changes.",
+      "loading": "Loading status changes…",
+      "retry": "Retry",
+      "unsupported": "Jira requires fields Orca cannot collect yet: {{fields}}."
+    },
     "workspace": {
       "linkedCount_one": "{{count}} workspace linked to {{key}}",
-      "linkedCount_other": "{{count}} workspaces linked to {{key}}"
+      "linkedCount_other": "{{count}} workspaces linked to {{key}}",
+      "startAnother": "Start new workspace"
     }
   },
   "languages": {
@@ -3613,6 +4263,12 @@
       "skills": {
         "count_one": "{{count}} skill",
         "count_other": "{{count}} skills"
+      }
+    },
+    "browser": {
+      "profileScope": {
+        "repoProfileLabel": "Repo: {{name}}",
+        "worktreeProfileLabel": "Workspace: {{name}}"
       }
     },
     "diagnostics": {
@@ -3968,6 +4624,10 @@
   },
   "taskProviders": {
     "linear": {
+      "commentsLoadFailed": "Failed to load comments.",
+      "descriptionUpdateFailed": "Failed to update description",
+      "projectNotFound": "Project was not found.",
+      "titleUpdateFailed": "Failed to update title",
       "truncated": {
         "issues_one": "Showing the first {{count}} issue. Search or open Linear for the full set.",
         "issues_other": "Showing the first {{count}} issues. Search or open Linear for the full set.",
@@ -3983,16 +4643,83 @@
     }
   },
   "terminal": {
+    "claudeDiffPanelNotice": {
+      "body": "To hide it, type /diff in Claude Code. Claude remembers that choice for later sessions.",
+      "gotIt": "Got it",
+      "title": "Claude Code can open its own diff panel beside the chat in wide terminals. That panel is Claude's, not Orca's."
+    },
+    "claudeOldTerminalBanner": {
+      "dialogCause": "Terminals opened before this update don't, so claude here signs in with System default's login. Open a new terminal to use the selected account.",
+      "dialogDescription": "Orca now keeps each Claude account in its own folder, and claude in a new terminal follows the account you select.",
+      "dialogTitle": "Why claude here doesn't use the selected account",
+      "title": "This terminal was opened before Orca's Claude account update, so claude here uses System default's login."
+    },
+    "claudeThemeSyncOffer": {
+      "accept": "Match theme",
+      "accepted": "Claude Code theme sync is on",
+      "acceptedDescription": "New Claude Code sessions on this computer use your Orca theme.",
+      "decline": "No thanks",
+      "description": "Claude Code on this computer would use your terminal colors and follow theme changes, including outside Orca. You can change this in Settings.",
+      "failed": "Could not turn on Claude Code theme sync",
+      "failedDescription": "Turn it on in Settings.",
+      "title": "Match Claude Code to your Orca theme?"
+    },
+    "codexSharedServerBanner": {
+      "alsoStop": "Also stop the running server (closes all Codex sessions using it, including outside Orca)",
+      "body": "Sessions may end unexpectedly, and agent status may be wrong.",
+      "cancel": "Cancel",
+      "copied": "Copied",
+      "copyCommand": "Copy command",
+      "couldNotTurnOff": "Couldn’t turn off sharing.",
+      "dialogQuestion": "Give each Codex tab its own server?",
+      "dialogSummary": "Turns off Codex server sharing, also outside Orca.",
+      "fix": "Fix",
+      "howToUndo": "How to undo",
+      "oldTerminalDialogCause": "Older terminals still share a Codex server. Open a new terminal to run Codex on a separate server.",
+      "oldTerminalDialogRisk": "Codex sessions that share a server can end together, and agent status can be wrong.",
+      "oldTerminalDialogTitle": "Why this Codex shares a server",
+      "openedBeforeUpdateBody": "This terminal was opened before Orca started giving each Codex its own server.",
+      "stopFailedAfterOff": "Sharing is off, but the server didn’t stop.",
+      "stopServer": "Stop server",
+      "stopSummary": "Stops the running server and closes all Codex sessions using it.",
+      "stopping": "Stopping…",
+      "title": "This Codex is sharing a server with your other Codex tabs",
+      "turnOffAndStop": "Turn off and stop server",
+      "turnOffSharing": "Turn off sharing",
+      "turningOff": "Turning off…",
+      "undoRun": "To turn sharing back on, run:"
+    },
+    "codexSharedSettingsNotice": {
+      "description": "Codex may ask again to trust folders or approve commands. Re-add any MCP servers you added only in Orca.",
+      "dismiss": "Dismiss",
+      "title": "Codex in Orca now uses ~/.codex"
+    },
+    "codexTerminalServerIsolationNotice": {
+      "description": "This makes agent status more reliable. You can turn it back on in Settings.",
+      "openSettings": "Open Settings",
+      "title": "Orca now runs Codex without its shared server"
+    },
     "newerDaemonBanner": {
+      "failedTitle": "Couldn't reopen this terminal",
       "reopenTerminal": "Reopen {{count}} terminals",
       "reopenTerminal_one": "Reopen terminal",
       "reopenTerminal_other": "Reopen {{count}} terminals",
       "reopened": "Reopened {{count}} terminals",
       "reopened_one": "Reopened {{count}} terminal",
       "reopened_other": "Reopened {{count}} terminals",
+      "reopening": "Reopening…",
+      "resumableBody": "Reopen it here to keep working. Your agent session will resume.",
       "resumed": "{{count}} agent sessions resumed.",
       "resumed_one": "{{count}} agent session resumed.",
-      "resumed_other": "{{count}} agent sessions resumed."
+      "resumed_other": "{{count}} agent sessions resumed.",
+      "title": "This terminal was opened in a newer version of Orca",
+      "tryAgain": "Try again"
+    },
+    "paneMove": {
+      "failed": "Couldn't move the pane to a new tab."
+    },
+    "paneTopBanner": {
+      "openNewTerminal": "Open new terminal"
     },
     "severedDaemonBanner": {
       "count": "{{count}} running terminals",
@@ -4059,6 +4786,13 @@
       },
       "withChildrenTitle_one": "Delete {{name}} and {{count}} child workspace?",
       "withChildrenTitle_other": "Delete {{name}} and {{count}} child workspaces?"
+    },
+    "setupTrust": {
+      "changedAgain": "Setup didn't run: this workspace's orca.yaml changed again since you reviewed it.",
+      "createdBranchSkipped": "Setup didn't run: this workspace's branch has different orca.yaml setup commands than the ones you approved.",
+      "hostUnsupported": "Approved. Update Orca on the workspace host to run setup for an existing workspace.",
+      "reviewAction": "Review setup",
+      "runFailed": "Could not start setup."
     }
   },
   "worktreeJumpPalette": {
