@@ -68,6 +68,38 @@ describe('matchProfileRuns', () => {
     )
   })
 
+  it('binds a run to its session id regardless of folder, clock or sibling sessions', () => {
+    const bound = { ...run('r1', 'a', 0, '/repo'), paneKey: 'tab:leaf', sessionId: 's-resumed' }
+    const matched = matchProfileRuns(
+      [bound],
+      [
+        // A resumed session started hours later in another folder, next to a decoy in the start window.
+        session('s-resumed', 5 * 3_600_000, 1, '/elsewhere'),
+        session('s-decoy', 1_000, 1)
+      ]
+    )
+    expect(matched.map((m) => [m.run.runId, m.session.sessionId])).toEqual([['r1', 's-resumed']])
+  })
+
+  it('does not guess for a pane run whose session never reported', () => {
+    const unbound = { ...run('r1', 'a', 0), paneKey: 'tab:leaf' }
+    expect(matchProfileRuns([unbound], [session('s1', 1_000, 1)])).toEqual([])
+  })
+
+  it('keeps the window heuristic for records written before the pane binding', () => {
+    const matched = matchProfileRuns(
+      [
+        run('r-old', 'a', 0),
+        { ...run('r-new', 'b', 0, '/other'), paneKey: 'p', sessionId: 's-new' }
+      ],
+      [session('s-old', 1_000, 1), session('s-new', 2_000, 1, '/other')]
+    )
+    expect(matched.map((m) => [m.run.runId, m.session.sessionId]).sort()).toEqual([
+      ['r-new', 's-new'],
+      ['r-old', 's-old']
+    ])
+  })
+
   it('drops a run that several sessions claim', () => {
     const matched = matchProfileRuns(
       [run('r1', 'a', 0)],
