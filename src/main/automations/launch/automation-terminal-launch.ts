@@ -17,6 +17,7 @@ import { deliverTerminalAgentLaunchPrompt } from '../../runtime/rpc/methods/agen
 import { AutomationRunLaunchError, type AutomationLaunch } from './automation-launch'
 import { buildAutomationWorktreeCreateArgs } from './automation-workspace-create'
 import type { AutomationRepoRunTarget } from '../ownership/run-target-resolution'
+import { runOwnHandle } from '../terminal-retention/runtime-run-terminal-retention'
 
 const TERMINAL_ONLY_MESSAGE = 'An automation starts a terminal agent only.'
 
@@ -287,15 +288,4 @@ export type RunOwnHandleRuntime = Pick<
 >
 
 /** Reject reused pane handles whose PTY no longer belongs to this run, or has exited. */
-export function runOwnHandle(runtime: RunOwnHandleRuntime, run: AutomationRun): string | null {
-  const handle = run.terminalPaneKey
-    ? runtime.getTerminalHandleForPaneKey(run.terminalPaneKey)
-    : null
-  // A closed pane's handle still resolves to its PTY for exit waits; only the exit verdict tells.
-  return handle &&
-    run.terminalPtyId &&
-    runtime.getTerminalPtyIdForHandle(handle) === run.terminalPtyId &&
-    runtime.getPtyLivenessVerdict(run.terminalPtyId)?.status !== 'exited'
-    ? handle
-    : null
-}
+export { runOwnHandle }
