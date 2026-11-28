@@ -5,7 +5,10 @@ import { checkPtyIpcLaunchPane, resolveEarlyPaneKey } from './spawn-begin'
 import { stopReplacedPaneOwner } from '../pane/pane-owner-replacement'
 import { keepAbsentBindingForSwap } from './spawn-absent-binding-swap'
 import { loadAgentProfileCatalog } from '../../../claude/agent-profile/agent-profile-catalog-service'
-import { prepareAgentProfileForPtySpawn } from '../../../claude/agent-profile/agent-profile-spawn-preparation'
+import {
+  detachAgentProfileFromPane,
+  prepareAgentProfileForPtySpawn
+} from '../../../claude/agent-profile/agent-profile-spawn-preparation'
 import { planPaneAgentLaunch } from './spawn-agent-launch'
 import { applyAgentLaunchPluginHook } from '../spawn/spawn-agent-launch-plugin-hook'
 import { endPaneAgentLaunch } from './spawn-agent-launch-end'
@@ -57,6 +60,7 @@ export async function runPtyIpcSpawn(deps: PtySpawnIpcDeps, request: PtySpawnIpc
           profileId: ctx.args.agentProfileId,
           connectionId: ctx.args.connectionId,
           cwd: ctx.args.cwd,
+          paneKey: resolveEarlyPaneKey(ctx.args),
           // Why the catalog: a central profile is not in settings, but a start may name it.
           settings: deps.store
             ? {
@@ -66,6 +70,9 @@ export async function runPtyIpcSpawn(deps: PtySpawnIpcDeps, request: PtySpawnIpc
               }
             : deps.getSettings?.()
         })
+      }
+      if (!ctx.earlyStablePaneOwner && ctx.args.agentProfileId === undefined) {
+        detachAgentProfileFromPane(resolveEarlyPaneKey(ctx.args))
       }
       await preparePtyIpcSpawnPreflight(ctx)
       await assemblePtyIpcSpawnEnv(ctx)
