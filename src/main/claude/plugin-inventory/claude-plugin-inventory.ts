@@ -2,10 +2,13 @@
 // brings. Read from config files and plugin folders, never the CLI, so it is cheap and works on any host.
 import { readdir, stat } from 'node:fs/promises'
 import { homedir } from 'node:os'
-import { join, resolve } from 'node:path'
+import { isAbsolute, join, resolve } from 'node:path'
 import { readPluginMetadataFile } from '../../skills/discovery/plugin-skill-metadata'
 import { resolveClaudeGlobalConfigFile } from '../configuration/claude-folder-trust-file'
-import { parseJsonObject } from '../../../shared/workspace-setup/setup-script-import-parsers'
+import {
+  asRecord,
+  parseJsonObject
+} from '../../../shared/workspace-setup/setup-script-import-parsers'
 import type {
   ClaudePluginInventory,
   ClaudePluginInventoryEntry
@@ -72,6 +75,26 @@ async function readSources(
         ]
       : [])
   ])
+  const knownMarketplaces = asRecord(
+    parseJsonObject(
+      await readPluginMetadataFile(join(configDir, 'plugins', 'known_marketplaces.json'))
+    )
+  )
+  const directoryMarketplaces = await Promise.all(
+    Object.entries(knownMarketplaces ?? {}).flatMap(([name, raw]) => {
+      const entry = asRecord(raw)
+      const root = entry?.installLocation
+      return asRecord(entry?.source)?.source === 'directory' &&
+        typeof root === 'string' &&
+        isAbsolute(root)
+        ? [
+            readPluginMetadataFile(join(root, '.claude-plugin', 'marketplace.json')).then(
+              (manifest) => ({ name, root, manifest })
+            )
+          ]
+        : []
+    })
+  )
   const accountFolder = syncedAccountFolderName(globalConfig)
   const syncedDir = accountFolder ? join(configDir, 'plugins', 'synced', accountFolder) : null
   const synced = syncedDir
@@ -82,7 +105,7 @@ async function readSources(
           .map((entry) => entry.name)
       }
     : null
-  return { configDir, installedPlugins, settings, globalConfig, synced }
+  return { configDir, installedPlugins, settings, globalConfig, synced, directoryMarketplaces }
 }
 
 async function readInventory(
@@ -94,7 +117,14 @@ async function readInventory(
   const plugins = await Promise.all(
     resolveClaudePluginInventory(sources, cwd).map(
       async (plugin): Promise<ClaudePluginInventoryEntry> => {
-        const folder = await readClaudePluginFolder(plugin.installPath)
+        // A directory marketplace's plugin runs from its source folder; the cache copy is the fallback.
+        const sourceRead = plugin.sourceFolder
+          ? await readClaudePluginFolder(plugin.sourceFolder)
+          : null
+        const folder =
+          sourceRead && sourceRead.problem !== 'missing-folder'
+            ? sourceRead
+            : await readClaudePluginFolder(plugin.installPath)
         const manifest = folder.manifest
         const manifestName =
           typeof manifest?.name === 'string' && manifest.name ? manifest.name : null
