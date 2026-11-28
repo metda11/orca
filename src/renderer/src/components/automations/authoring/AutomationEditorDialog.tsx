@@ -53,6 +53,8 @@ export type AutomationDraft = {
   surface?: 'chat' | 'terminal'
   /** Saved as-is; empty means none. */
   extraAgentArgs: string
+  /** Claude agent profile id; empty or absent means none. */
+  agentProfileId?: string
   /** Set when the automation runs as a bot; the project, workspace, session and agent are then the bot's. */
   bot: AutomationBotTarget | null
   /** The host listing the picked bot: ids are random per host, so the id alone can name two. */
