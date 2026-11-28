@@ -46,6 +46,10 @@ import { BotShareClient } from '../../bots/sharing/bot-share-client'
 import { skillPackageDownloadOrigins } from '../../skills/runtime-transfer/skill-client-mediated-transfer'
 import { join } from 'node:path'
 import {
+  agentProfileRootDir,
+  installProfileRunSessionBinding
+} from '../../claude/agent-profile/agent-profile-session-binding'
+import {
   AgentStatusObservedPaneIdentities,
   recordObservedAgentStatusPaneIdentity
 } from '../../runtime/terminal/identity/agent-status-observed-pane-identity'
@@ -149,6 +153,8 @@ export function initializeMainProcessRuntime(
   agentHookServer.subscribeEnrichedStatus((enriched) =>
     recordObservedAgentStatusPaneIdentity(observedPaneIdentities, enriched, runtime)
   )
+  // Binds each profile start to its Claude session id; usage attribution and the pane chip read it.
+  deps.registerCleanup(installProfileRunSessionBinding(agentHookServer, agentProfileRootDir))
   agentHookServer.setCliWriterExecutionMatcher(observedPaneIdentities, runtime)
   agentHookServer.setClaudePermissionHolds(runtime.terminalWorkerApprovals)
   // Main records pane resume state from accepted status.

@@ -16,6 +16,7 @@ import {
   loadAgentProfileCatalog,
   resetDefaultAgentProfile
 } from '../claude/agent-profile/agent-profile-catalog-service'
+import { readProfilePaneBindings } from '../claude-usage/loadout/profile-run-registry'
 import { handleAppQuitRequest } from './renderer-requests/app-quit-request'
 import { prepareWindowsAdministratorRestart } from '../windows/windows-administrator-restart'
 import { quitProcess } from '../startup/quit/process-quit-request'
@@ -254,6 +255,13 @@ export function registerAppHandlers(store: Store, options: RegisterAppHandlersOp
       throw new Error('Access denied: unauthorized sender')
     }
     return loadAgentProfileCatalog(store)
+  })
+
+  ipcMain.handle('app:getAgentProfilePaneBindings', async (event) => {
+    if (!isTrustedUIRenderer(event.sender)) {
+      throw new Error('Access denied: unauthorized sender')
+    }
+    return readProfilePaneBindings(app.getPath('userData'))
   })
 
   ipcMain.handle('app:resetDefaultAgentProfile', async (event, id: unknown) => {
