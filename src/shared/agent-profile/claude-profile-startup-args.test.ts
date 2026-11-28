@@ -28,6 +28,17 @@ describe('resolveClaudeProfileStartupArgs', () => {
     expect(args('posix')).toContain('--model opus')
   })
 
+  it('uses the profile main resolved when settings do not list it (central profile)', () => {
+    const args = resolveClaudeProfileStartupArgs({
+      agent: 'claude',
+      profiles: [],
+      request: { id: 'p1', rootDir: '/d', profile },
+      shell: 'posix',
+      isRemote: false
+    })
+    expect(args).toContain('--model opus')
+  })
+
   it('refuses hosts and agents that cannot read the profile files', () => {
     const base = {
       profiles: [profile],

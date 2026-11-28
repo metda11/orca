@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -35,9 +35,29 @@ describe('prepareAutomationAgentProfile', () => {
       settings,
       userDataDir: root
     })
-    expect(request).toEqual({ id: 'worker', rootDir: root })
+    expect(request).toEqual({ id: 'worker', rootDir: root, profile: settings.agentProfiles[0] })
     const mcp = await readFile(join(root, 'agent-profiles', 'worker', 'mcp.json'), 'utf8')
     expect(JSON.parse(mcp)).toEqual({ mcpServers: { s: { command: 'x' } } })
+  })
+
+  it('resolves a read-only central profile and hands it to the startup plan', async () => {
+    root = await mkdtemp(join(tmpdir(), 'orca-automation-profile-'))
+    const centralDir = join(root, 'central')
+    await mkdir(centralDir)
+    await writeFile(
+      join(centralDir, 'team.json'),
+      JSON.stringify({ id: 'team', name: 'Team', mcpServers: { t: { command: 'y' } } })
+    )
+    const request = await prepareAutomationAgentProfile({
+      automation: { agentId: 'claude', agentProfileId: 'team' },
+      repo: localRepo,
+      cwd: '/work/repo',
+      settings: { agentProfiles: [], agentProfileCentralDir: centralDir },
+      userDataDir: root
+    })
+    expect(request).toMatchObject({ id: 'team', rootDir: root, profile: { id: 'team' } })
+    const mcp = await readFile(join(root, 'agent-profiles', 'team', 'mcp.json'), 'utf8')
+    expect(JSON.parse(mcp)).toEqual({ mcpServers: { t: { command: 'y' } } })
   })
 
   it('starts nothing special without a saved profile', async () => {

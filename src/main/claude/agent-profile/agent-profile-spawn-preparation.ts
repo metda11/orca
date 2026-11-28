@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { join } from 'node:path'
 import { getAppEnvironment } from '../../../shared/app-lifecycle/app-environment'
+import type { ClaudeAgentProfile } from '../../../shared/agent-profile/agent-profile-types'
 import type { GlobalSettings } from '../../../shared/settings/global-settings-types'
 import {
   AgentProfileLaunchError,
@@ -36,7 +37,7 @@ export function detachAgentProfileFromPane(paneKey: string | null): void {
   }
 }
 
-/** Write the files a profile start points at; refuses what the renderer's plan cannot have covered. */
+/** Write the files a profile start points at; refuses what the renderer's plan cannot have covered. Returns the resolved profile. */
 export async function prepareAgentProfileForPtySpawn(args: {
   profileId: unknown
   connectionId?: string | null
@@ -45,7 +46,7 @@ export async function prepareAgentProfileForPtySpawn(args: {
   paneKey?: string | null
   settings: Pick<GlobalSettings, 'agentProfiles'> | undefined
   userDataDir?: string
-}): Promise<void> {
+}): Promise<ClaudeAgentProfile> {
   if (typeof args.profileId !== 'string' || !isSafeAgentProfileId(args.profileId)) {
     throw new AgentProfileLaunchError('agent_profile_id_invalid')
   }
@@ -87,4 +88,5 @@ export async function prepareAgentProfileForPtySpawn(args: {
     startedAt: Date.now(),
     soll: buildClaudeProfileSoll(profile, installedPlugins)
   }).catch((error: unknown) => console.warn('[agent-profile] run record not written', error))
+  return profile
 }
