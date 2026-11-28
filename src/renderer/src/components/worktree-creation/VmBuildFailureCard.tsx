@@ -115,6 +115,19 @@ export function VmBuildFailureCard({
   )
 }
 
+async function runFixAndReport(
+  onRunFix: (checkId: string) => Promise<EnvironmentDoctorFixOutcome>,
+  checkId: string,
+  setOutcome: (outcome: EnvironmentDoctorFixOutcome) => void,
+  setRunning: (running: boolean) => void
+): Promise<void> {
+  try {
+    setOutcome(await onRunFix(checkId))
+  } finally {
+    setRunning(false)
+  }
+}
+
 function CheckRow({
   check,
   index,
@@ -135,11 +148,8 @@ function CheckRow({
     }
     setRunning(true)
     setOutcome(null)
-    try {
-      setOutcome(await onRunFix(check.id))
-    } finally {
-      setRunning(false)
-    }
+    // React Compiler rejects try/finally without catch inside components; the helper owns it.
+    await runFixAndReport(onRunFix, check.id, setOutcome, setRunning)
   }
   return (
     <li
