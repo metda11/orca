@@ -1,5 +1,6 @@
 import type { AutomationAuthorityRef } from '../../../../../shared/automations/ownership/automation-owner-ref'
 import { AutomationAgentLaunchPicker } from './AutomationAgentLaunchPicker'
+import { AutomationAgentProfileField } from './AutomationAgentProfileField'
 import type { ProspectiveWorkspace } from '@/lib/agent-session/launch/routing/agent-launch-route-input'
 import { useTranslate } from '@/i18n/use-translate'
 import { isValidAutomationSchedule } from '../../../../../shared/automations/scheduling/automation-schedule-parsing'
@@ -249,6 +250,12 @@ export function AutomationEditorSettingsSidebar({
               onDraftChange={onDraftChange}
             />
           </Field>
+          <AutomationAgentProfileField
+            draft={draft}
+            surface={surface}
+            pickerTriggerClassName={pickerTriggerClassName}
+            onDraftChange={onDraftChange}
+          />
         </div>
         {destination ? (
           <div className="mb-4">

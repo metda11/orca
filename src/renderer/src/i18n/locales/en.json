@@ -27344,6 +27344,11 @@
       "listSkipped": "Setup skipped",
       "listSkippedTitle": "The last run skipped setup because its branch's orca.yaml setup commands changed. Review them from the actions menu."
     },
+    "agentProfile": {
+      "label": "Agent profile",
+      "none": "No profile",
+      "notUsed": "The agent profile “{{id}}” only applies to a Claude terminal run without session reuse. Saving removes it."
+    },
     "botTarget": {
       "chat": "{{name}}'s Chat",
       "runsIn": "Runs in",
