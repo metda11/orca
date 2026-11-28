@@ -27,4 +27,5 @@ Remotes: `origin` = metda11/orca, `upstream` = stablyai/orca (einmalig:
 - Eigene Änderungen in neuen Dateien/Verzeichnissen halten (z. B. `src/shared/agent-profile/`), Änderungen
   an Upstream-Dateien klein halten. Konflikt im Merge lösen und committen, beide Seiten erhalten.
 - Offene Feature-Branches danach mit `git merge main` nachziehen.
-- Alternativ GitHub „Sync fork“ → „Update branch“, danach lokal `git pull`.
+- Vor jedem Sync ein Backup-Branch `backup/pre-sync-<datum>` nach `origin` pushen (macht `/sync-upstream`).
+- Alternativ GitHub „Sync fork“ → „Update branch“, danach lokal `git pull`. **Nie „Discard commits“ wählen**: das wirft unsere Commits weg.
