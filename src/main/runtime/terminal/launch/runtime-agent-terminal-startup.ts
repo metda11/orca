@@ -38,6 +38,7 @@ import { resolveQoderTerminalCommand } from './qoder-terminal-command-resolution
 import { resolveStartupShell } from '../../../../shared/agent-launch/startup/tui-agent-startup-shell'
 import { resolveWslSessionContext } from '../../../daemon/pty-subprocess/wsl-session-context'
 import { assertTuiAgentLaunchEnabled } from '../../../agent-launch/disabled-agent-launch-refusal'
+import { assertAgentProfileHostIsLocal } from '../../../claude/agent-profile/agent-profile-host-check'
 import { resolveWslHostAgentLaunchInputs } from './wsl-host-agent-terminal-launch'
 
 /** No launch command could be built for a requested `startupAgent`. */
@@ -175,6 +176,9 @@ async function buildRuntimeAgentTerminalStartupOptions(
   if (opts.startupPrompt && !forceLine && !agentPromptRidesLaunchCommand(agent)) {
     throw new Error(`Agent ${agent} does not take a startup prompt on its launch command.`)
   }
+  if (opts.agentProfile) {
+    assertAgentProfileHostIsLocal({ cwd: workspace.path, runtime })
+  }
   const scope = {
     inputs: resolveWslHostAgentLaunchInputs(
       resolveAgentStartupPlanInputs({
@@ -184,6 +188,7 @@ async function buildRuntimeAgentTerminalStartupOptions(
         isRemote,
         ...(opts.agentArgs !== undefined ? { agentArgs: opts.agentArgs } : {}),
         ...(opts.extraAgentArgs !== undefined ? { extraAgentArgs: opts.extraAgentArgs } : {}),
+        ...(opts.agentProfile ? { agentProfile: opts.agentProfile } : {}),
         shell: agentLaunchQuotingShell(runtime),
         sessionOptions: sessionOptions ?? host.toSessionOptions(opts.launchPreferences),
         ...(opts.suppressStartupUpdatePrompt ? { suppressStartupUpdatePrompt: true } : {})

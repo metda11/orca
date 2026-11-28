@@ -96,7 +96,13 @@ export async function gateVmCreateOnEnvironmentCheck(
       update(creationId, { environmentCheck: { status: 'passed', checks: result.checks } })
       return true
     }
-    update(creationId, { environmentCheck: { status: 'failed', checks: result.checks } })
+    update(creationId, {
+      environmentCheck: {
+        status: 'failed',
+        checks: result.checks,
+        target: { environmentId, path }
+      }
+    })
     if (useAppStore.getState().activePendingCreationId !== creationId) {
       // The paused build keeps its VM running, so a background create must say it needs the user.
       toast.error(

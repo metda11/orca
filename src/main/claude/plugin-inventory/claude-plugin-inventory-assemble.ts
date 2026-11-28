@@ -22,7 +22,14 @@ export async function assembleClaudePluginInventory(args: {
   const plugins = await Promise.all(
     resolveClaudePluginInventory(sources, cwd, fs.path).map(
       async (plugin): Promise<ClaudePluginInventoryEntry> => {
-        const folder = await readClaudePluginFolder(plugin.installPath, fs)
+        // A directory marketplace's plugin runs from its source folder; the cache copy is the fallback.
+        const sourceRead = plugin.sourceFolder
+          ? await readClaudePluginFolder(plugin.sourceFolder, fs)
+          : null
+        const folder =
+          sourceRead && sourceRead.problem !== 'missing-folder'
+            ? sourceRead
+            : await readClaudePluginFolder(plugin.installPath, fs)
         const manifest = folder.manifest
         const manifestName =
           typeof manifest?.name === 'string' && manifest.name ? manifest.name : null

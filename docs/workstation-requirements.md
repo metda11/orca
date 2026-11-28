@@ -47,3 +47,7 @@ matches the allowlist in `src/shared/workspace-setup/environment-doctor/workstat
 
 Anything else (URLs to tarballs, local paths, credentials in URLs, shells, interactive
 installers, `irm | iex`) is shown as text and never run. Sign-in and OAuth flows are out of scope.
+
+The VM build sheet offers the same repair as a Fix button on a failed check that has one. It calls
+the RPC method `environment.doctor.fix` with only the path and the check id; the host rebuilds the
+command from its own list, so no argv ever comes from the client.

@@ -3379,6 +3379,10 @@
         "mergeRequest": "Merge request",
         "linkedIssue": "Linked issue",
         "listeningPort": "Listening port"
+      },
+      "ephemeralVmWorkstationFix": {
+        "unsupported": "This VM’s server is too old to run fixes. Run the shown command yourself.",
+        "failed": "The fix could not finish: {{error}}"
       }
     },
     "hooks": {
@@ -5199,7 +5203,8 @@
             "openAnywayHint": "Open anyway keeps this VM and creates the workspace on it as is. Dismiss destroys the VM.",
             "provision": "Provision VM",
             "retryChecks": "Retry checks",
-            "title": "Building your VM"
+            "title": "Building your VM",
+            "runFix": "Fix"
           }
         }
       },

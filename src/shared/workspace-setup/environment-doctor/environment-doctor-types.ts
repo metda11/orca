@@ -29,6 +29,8 @@ export type EnvironmentDoctorResult = {
   checks: EnvironmentDoctorCheck[]
 }
 
+export type EnvironmentDoctorFixOutcome = { ok: boolean; message: string }
+
 /** One line per check plus indented remediation; shared by the CLI and the agent prompt. */
 export function formatEnvironmentDoctorChecks(checks: readonly EnvironmentDoctorCheck[]): string[] {
   return checks.flatMap((check) => [

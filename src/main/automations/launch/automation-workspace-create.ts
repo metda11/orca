@@ -4,6 +4,7 @@ import { getRepoExecutionHostId } from '../../../shared/execution-host/execution
 import type { Automation } from '../../../shared/automations/automation-definition'
 import type { AutomationRun } from '../../../shared/automations/history/automation-run'
 import { buildAutomationWorkspaceProvenance } from '../../../shared/automations/ownership/automation-workspace-provenance'
+import type { AgentProfileLaunchRequest } from '../../../shared/agent-profile/claude-profile-startup-args'
 import type { Repo } from '../../../shared/repository/repo-types'
 import type { OrcaRuntimeService } from '../../runtime/orca-runtime'
 
@@ -28,12 +29,14 @@ export function buildAutomationWorktreeCreateArgs({
   automation,
   run,
   repo,
-  createdAt = Date.now()
+  createdAt = Date.now(),
+  agentProfile
 }: {
   automation: Automation
   run: HeadlessAutomationRunForWorkspace
   repo: Repo
   createdAt?: number
+  agentProfile?: AgentProfileLaunchRequest
 }): RuntimeCreateManagedWorktreeArgs {
   const setup = automationTerminalLaunchInputs(automation)
   return {
@@ -50,6 +53,7 @@ export function buildAutomationWorktreeCreateArgs({
     startupSuppressUpdatePrompt: true,
     startupTitle: run.title,
     ...(setup.extraAgentArgs ? { startupExtraAgentArgs: setup.extraAgentArgs } : {}),
+    ...(agentProfile ? { startupAgentProfile: agentProfile } : {}),
     ...(setup.agentArgs !== undefined ? { startupAgentArgs: setup.agentArgs } : {}),
     ...(setup.sessionOptions ? { startupSessionOptions: setup.sessionOptions } : {}),
     telemetrySource: 'unknown',

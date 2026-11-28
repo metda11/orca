@@ -8,3 +8,11 @@ export const EnvironmentDoctorParams = lazyZodSchema(() =>
     path: requiredString('Missing required path')
   })
 )
+
+/** Only ids travel: the host re-derives the repair command from its own requirements list. */
+export const EnvironmentDoctorFixParams = lazyZodSchema(() =>
+  z.object({
+    path: requiredString('Missing required path'),
+    checkId: requiredString('Missing required checkId')
+  })
+)

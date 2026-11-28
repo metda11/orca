@@ -56,6 +56,8 @@ export type Automation = {
   agentArgs?: string | null
   /** Saved text appended to the host's default agent Arguments on each fresh run; absent means none. */
   extraAgentArgs?: string
+  /** Saved Claude loadout every fresh run starts with; absent means the agent's own defaults. */
+  agentProfileId?: string
   /** Why: runContext carries the logical project + host setup identity for
    *  multi-host projects; projectId remains only as the legacy repo-id storage
    *  field for pre-host-context automations.
@@ -114,6 +116,8 @@ export type AutomationCreateInput = {
   launchSetupPatch?: AutomationLaunchSetupPatch
   /** Empty or whitespace means no extras. */
   extraAgentArgs?: string
+  /** Null or absent means no profile; a copy of an edit carries the update's null along. */
+  agentProfileId?: string | null
   runContext?: WorkspaceRunContext | null
   sourceContext?: TaskSourceContext | null
   bot?: AutomationBotTarget
@@ -137,7 +141,11 @@ export type AutomationCreateInput = {
   createdBy?: AutomationCreator
 }
 
-export type AutomationUpdateInput = { launchSetupPatch?: AutomationLaunchSetupPatch } & Partial<
+export type AutomationUpdateInput = {
+  launchSetupPatch?: AutomationLaunchSetupPatch
+  /** `null` clears the saved profile. */
+  agentProfileId?: string | null
+} & Partial<
   Pick<
     Automation,
     | 'name'
