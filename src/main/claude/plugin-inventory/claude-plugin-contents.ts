@@ -128,18 +128,23 @@ async function readMcpServers(
   root: string,
   manifest: Record<string, unknown> | null
 ) {
+  // Measured against Claude Code 2.1.332: `.mcp.json` in the plugin root loads in addition to
+  // whatever the manifest declares, as an inline object or as a path.
   const declared = manifest?.mcpServers
-  if (declared && typeof declared === 'object' && !Array.isArray(declared)) {
-    return mcpServerNames({ mcpServers: declared })
-  }
-  const files =
-    typeof declared === 'string'
+  const inline =
+    declared && typeof declared === 'object' && !Array.isArray(declared)
+      ? mcpServerNames({ mcpServers: declared })
+      : []
+  const files = [
+    fs.path.join(root, '.mcp.json'),
+    ...(typeof declared === 'string' || Array.isArray(declared)
       ? manifestPaths(fs, root, declared)
-      : [fs.path.join(root, '.mcp.json')]
+      : [])
+  ]
   const names = await Promise.all(
     files.map(async (file) => mcpServerNames(parseJsonObject(await fs.readText(file))))
   )
-  return [...new Set(names.flat())].sort()
+  return [...new Set([...inline, ...names.flat()])].sort()
 }
 
 export async function readClaudePluginFolder(
