@@ -16,6 +16,11 @@ PRs verweisen mit `Refs #<n>`, nie mit `Closes`/`Fixes`/`Resolves`. Keine lokale
 
 Soll-Liste und Allowlist der Fixes für `orca vm env doctor`: [docs/workstation-requirements.md](docs/workstation-requirements.md). INNONAV-Inhalte der Liste gehören nicht ins Repo (Upstream-tauglich bleiben).
 
+## Lokal starten und prüfen
+
+- `.\start.ps1`: baut und startet den Fork (Dev-Profil `%APPDATA%\orca-dev`; `-Mode Packaged` für die gebaute App).
+- `.\check.ps1`: Typecheck und Tests der Fork-Bereiche (Agent-Profile, Claude-Plugins, Automations, unsere RPC-Teile, Settings). Vitest immer mit `--exclude '.claude/**'`. Neue Fork-Verzeichnisse dort in der Testliste ergänzen.
+
 ## Upstream-Sync (stablyai/orca)
 
 Remotes: `origin` = metda11/orca, `upstream` = stablyai/orca (einmalig:
