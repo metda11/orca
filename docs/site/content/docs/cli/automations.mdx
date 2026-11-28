@@ -123,6 +123,16 @@ Saved extras use the same quoting on every host, including Windows: wrap values 
 
 Extras accept only model and effort options, plus Claude's `--add-dir`, for Antigravity, Claude, Codex, CodeBuddy, Cursor, Grok, OMP, and Pi. For Pi, use `--model` and `--thinking`; a default `--provider` stays and scopes the model. Permission, config, prompt, and session options are rejected. Extras require a fresh session for every run, so they can't be combined with `--reuse-session`. Use `orca automations edit <automationId> --extra-agent-args=` to clear them.
 
+## Agent profile
+
+Start every fresh run of a Claude automation with a saved agent profile from Settings, for example a fixed loadout for an unattended board worker:
+
+```bash
+orca automations create   --name "Board worker"   --trigger hourly   --prompt "Work the next board item"   --provider claude   --agent-profile board-worker
+```
+
+Orca writes the profile's files and starts Claude with its plugins, MCP servers, model, permission mode and tool limits. A run whose target cannot carry the profile fails with the reason instead of starting without it: a remote host, WSL, the chat surface, a profile that names a Claude account, a profile that no longer exists, or a failed preflight. A profile can't be combined with `--reuse-session`. Use `orca automations edit <automationId> --agent-profile=` to clear it.
+
 ## Review and enable
 
 List and inspect automations before enabling them:

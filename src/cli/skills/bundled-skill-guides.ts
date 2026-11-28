@@ -712,6 +712,8 @@ const ORCA_CLI_AUTOMATIONS_REFERENCE_MARKDOWN = [
   "",
   "Use `--extra-agent-args=\"--model opus --effort high --add-dir docs\"` to add arguments after the host's default agent Arguments on every fresh run (always pass it with `=`, since the value starts with `--`). Only model and effort options, plus Claude's `--add-dir`, are accepted, for `antigravity`, `claude`, `codex`, `codebuddy`, `cursor`, `grok`, `omp`, and `pi` (`--model`, `--thinking`). Model or effort in the extras replaces the default's; a default Pi `--provider` stays and scopes the model. Extras can't be combined with `--reuse-session`. `--extra-agent-args=` on edit clears them.",
   "",
+  "Use `--agent-profile <id>` to start every fresh run with a saved Claude agent profile (plugins, MCP servers, model, permission mode, tool limits). It applies to `claude` terminal runs on this computer. A run whose target cannot carry the profile (remote host, WSL, chat surface, a profile with a Claude account, a missing profile, a failed preflight) fails with the reason instead of starting without it, and the profile can't be combined with `--reuse-session`. `--agent-profile=` on edit clears it.",
+  "",
   "## Bot automations and events",
   "",
   "A bot's automation names the bot instead of a provider and place, and can start on an event as well as (or instead of) a schedule, or once at a time (a reminder):",

@@ -122,7 +122,17 @@ export function automationDraftLaunchSetup(
       : {}
 }
 
+/** A copy of an edit keeps the saved agent profile; the editor does not change it. */
 export function automationCopyLaunchSetup(
+  current: Automation | null,
+  updates: AutomationUpdateInput,
+  input: AutomationCreateInput
+): AutomationCreateInput {
+  const copied = copyLaunchSetup(current, updates, input)
+  return current?.agentProfileId ? { agentProfileId: current.agentProfileId, ...copied } : copied
+}
+
+function copyLaunchSetup(
   current: Automation | null,
   updates: AutomationUpdateInput,
   input: AutomationCreateInput

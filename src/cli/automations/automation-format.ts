@@ -170,6 +170,7 @@ export function formatAutomationShow(result: AutomationShowPayload): string {
     `provider: ${automation.agentId}`,
     ...(automation.bot ? [formatBotAgent(automation.bot)] : []),
     ...(automation.extraAgentArgs ? [`extraAgentArgs: ${automation.extraAgentArgs}`] : []),
+    ...(automation.agentProfileId ? [`agentProfile: ${automation.agentProfileId}`] : []),
     `enabled: ${automation.enabled}`,
     ...(automation.bot
       ? [formatRunsInChat(automation) ?? `runs in: ${automation.bot.runsIn}`]

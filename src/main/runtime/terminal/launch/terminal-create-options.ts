@@ -3,6 +3,7 @@ import type {
   AgentProviderSessionMetadata,
   SleepingAgentLaunchConfig
 } from '../../../../shared/agent-session/lifecycle/agent-session-resume'
+import type { AgentProfileLaunchRequest } from '../../../../shared/agent-profile/claude-profile-startup-args'
 import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
 import type { AgentLaunchRuntime } from '../../../../shared/agent-launch/startup/agent-launch-runtime'
 import type { SessionOptionValue } from '../../../../shared/native-chat/input/native-chat-session-options'
@@ -45,6 +46,8 @@ export type TerminalCreateOptions = {
   /** Override Settings arguments for this agent (null means none); plan input is not a caller-supplied command and does not take launch ownership. */
   agentArgs?: string | null
   extraAgentArgs?: string
+  /** Main-internal: a saved Claude loadout whose files the caller already wrote. */
+  agentProfile?: AgentProfileLaunchRequest
   /** Main-internal: Orca, not a user, types into this `startupAgent` once it starts. */
   suppressStartupUpdatePrompt?: boolean
   /** Host-only runtime fact used to quote this launch; spawn must take its shell from that same fact, never client input. */

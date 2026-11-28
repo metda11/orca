@@ -51,6 +51,7 @@ export const AUTOMATION_COMMAND_SPECS: CommandSpec[] = [
       'prompt',
       'provider',
       'extra-agent-args',
+      'agent-profile',
       'bot',
       'agent',
       'model',
@@ -83,13 +84,15 @@ export const AUTOMATION_COMMAND_SPECS: CommandSpec[] = [
       "Use --agent <agent> [--model <id>] [--effort <level>] (bots only, with --runs-in new) to run a bot's automation on another agent or model than the bot's own; it keeps the bot's folder, memory, connectors and results. Use it instead of a project automation when a bot's job needs another model. Without --agent, --model and --effort apply to the bot's current agent.",
       'Use --item <n> (bots only) to link the automation to your item n, so the item shows what will wake you for it.',
       "Use --once (bots only) for a wait: it runs a single time, on the first matching --on event, and is then deleted. Add --by <ISO time> to also run it at that time if no event came first; the run's prompt then says the deadline came. Without --by it runs only if the event happens, and ends unrun after 30 days. A wait runs in the chat that made it (or the bot's Chat if made elsewhere, or if that chat is closed when it fires) and reports there unless --runs-in says otherwise; one made answering a Slack thread answers in that thread. --results-to channel:<channel> or linear:<issue> adds a copy of the result there; none adds none and doesn't stop that thread answer; thread (with --runs-in new) answers in the event's thread, running in the chat that owns it when one is open. With --by and no --on it is a one-time reminder.",
-      'Use --extra-agent-args="--model opus --effort high" to add arguments after the host\'s default agent Arguments on each fresh run. Only model, effort, and a few safe options are accepted (Antigravity, Claude, Codex, CodeBuddy, Cursor, Grok, OMP, Pi); extras cannot be combined with --reuse-session. On edit, --extra-agent-args= clears them.'
+      'Use --extra-agent-args="--model opus --effort high" to add arguments after the host\'s default agent Arguments on each fresh run. Only model, effort, and a few safe options are accepted (Antigravity, Claude, Codex, CodeBuddy, Cursor, Grok, OMP, Pi); extras cannot be combined with --reuse-session. On edit, --extra-agent-args= clears them.',
+      'Use --agent-profile <id> (Claude, terminal runs on this computer) to start every fresh run with a saved agent profile from Settings: its plugins, MCP servers, model, permission mode and tool limits. A run whose target cannot carry the profile (remote host, WSL, chat surface, a profile with a Claude account, a missing profile or a failed preflight) fails with the reason instead of starting without it; session reuse cannot be combined. On edit, --agent-profile= clears it.'
     ],
     examples: [
       'orca automations create --name "Daily review" --trigger daily --prompt "Review open changes" --provider codex',
       'orca automations create --name "Weekday triage" --trigger "0 9 * * 1-5" --prompt "Triage issues" --provider claude --repo my-repo',
       'orca automations create --name "PR review" --trigger hourly --precheck "gh pr list --json number -q .[0].number" --prompt "Review requested PRs" --provider codex',
       'orca automations create --name "Docs pass" --trigger daily --prompt "Tidy the docs" --provider claude --extra-agent-args="--model opus --effort high --add-dir docs"',
+      'orca automations create --name "Board worker" --trigger hourly --prompt "Work the next board item" --provider claude --agent-profile board-worker',
       'orca automations create --name "Nora\'s reply in #orca" --bot ranger --once --by <deadline, as YYYY-MM-DDTHH:MM:SS±HH:MM> --prompt "Tell me what Nora said; if the deadline came first, remind me he hasn\'t replied" --on "slack.message subject=<thread link> from=@nora"',
       'orca automations create --name "Stretch break" --bot ranger --once --by <now plus 10 minutes, as YYYY-MM-DDTHH:MM:SS±HH:MM> --prompt "Remind me to stretch"',
       'orca automations create --name "Stall investigator" --bot ranger --trigger "*/30 * * * *" --agent codex --model gpt-6.1-terra --effort high --results-to channel:C0123ABCD --prompt "Investigate stalls"',
@@ -139,6 +142,7 @@ export const AUTOMATION_COMMAND_SPECS: CommandSpec[] = [
       'prompt',
       'provider',
       'extra-agent-args',
+      'agent-profile',
       'on',
       'agent',
       'model',
@@ -164,6 +168,7 @@ export const AUTOMATION_COMMAND_SPECS: CommandSpec[] = [
       'orca automations edit 2f9e... --disabled',
       'orca automations edit --id 2f9e... --trigger "30 * * * *" --json',
       'orca automations edit 2f9e... --extra-agent-args=',
+      'orca automations edit 2f9e... --agent-profile=',
       'orca automations edit 2f9e... --on "slack.mentioned in=C0123ABCD" --on "slack.reaction in=C0123ABCD contains=:rocket:"',
       'orca automations edit 2f9e... --runs-in chat --results-to channel:C0123ABCD',
       'orca automations edit 2f9e... --agent bot'

@@ -18,6 +18,7 @@ import {
   assertAutomationExtraAgentArgs,
   storedExtraAgentArgs
 } from '../../../shared/automations/launch/automation-extra-agent-args-record'
+import { assertAutomationAgentProfile } from '../../../shared/automations/launch/automation-agent-profile'
 import { settleAutomationTriggers } from '../../webhooks/webhook-rule-check'
 import { deriveAutomationExecutionTargetForCreate } from '../../../shared/automations/ownership/automation-execution-target'
 import {
@@ -117,6 +118,7 @@ export function createAutomation(
       : {}),
     ...(setup.agentArgs !== undefined ? { agentArgs: setup.agentArgs } : {}),
     ...(extraAgentArgs !== undefined ? { extraAgentArgs } : {}),
+    ...(input.agentProfileId ? { agentProfileId: input.agentProfileId } : {}),
     // Prefer authority-local contexts; client-assigned runtime IDs cannot identify this store's host.
     runContext: contexts.runContext ?? input.runContext ?? null,
     sourceContext: contexts.sourceContext ?? input.sourceContext ?? null,
@@ -144,6 +146,7 @@ export function createAutomation(
   }
   applyAutomationSetupTrust(automation, input)
   assertAutomationExtraAgentArgs(automation)
+  assertAutomationAgentProfile(automation)
   settleAutomationTriggers(automation)
   operations.state.automations = [...(operations.state.automations ?? []), automation]
   operations.recordCreated()

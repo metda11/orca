@@ -1,10 +1,5 @@
 import { automationTerminalLaunchInputs } from '../../../shared/automations/launch/automation-launch-setup'
-import { parseWorkspaceKey } from '../../../shared/workspace/identity/workspace-scope'
-import {
-  getRepoExecutionHostId,
-  parseExecutionHostId
-} from '../../../shared/execution-host/execution-host'
-import { automationRunFailure } from '../../../shared/automations/history/automation-run-failure-copy'
+import { getRepoExecutionHostId } from '../../../shared/execution-host/execution-host'
 // Automations observe PTYs, so launch terminal agents regardless of the chat default.
 
 import type { AgentLaunchSurfaceExecution } from '../../agent-launch/agent-launch-execution'
@@ -14,10 +9,12 @@ import type { RuntimeTerminalCreate } from '../../../shared/terminal/runtime/run
 import type { Automation } from '../../../shared/automations/automation-definition'
 import type { AutomationRun } from '../../../shared/automations/history/automation-run'
 import { findReusableAutomationRun } from '../../../shared/automations/history/automation-session-reuse'
+import type { GlobalSettings } from '../../../shared/settings/global-settings-types'
+import { requireWorkspaceId, resolveLocalExistingWorkspace } from './automation-existing-workspace'
+import { prepareAutomationAgentProfile } from './automation-agent-profile-launch'
 import type { OrcaRuntimeService } from '../../runtime/orca-runtime'
 import { deliverTerminalAgentLaunchPrompt } from '../../runtime/rpc/methods/agent-launch/agent-launch-terminal-prompt'
 import { AutomationRunLaunchError, type AutomationLaunch } from './automation-launch'
-import { AutomationDispatchRefusedError } from '../dispatch/automation-launch-runner'
 import { buildAutomationWorktreeCreateArgs } from './automation-workspace-create'
 import type { AutomationRepoRunTarget } from '../ownership/run-target-resolution'
 
@@ -41,6 +38,7 @@ export async function launchAutomationTerminalAgent(
     run: Pick<AutomationRun, 'id' | 'title' | 'scheduledFor' | 'trigger'>
     target: AutomationRepoRunTarget
     runs: readonly AutomationRun[]
+    settings: Pick<GlobalSettings, 'agentProfiles'> | undefined
   }
 ): Promise<AutomationTerminalAgentLaunch> {
   const { automation, run, target } = request
@@ -52,7 +50,12 @@ export async function launchAutomationTerminalAgent(
   const selectedWorkspace = selectedTarget?.managedWorktree
   // The startup plan trims the prompt for every agent; a blank one launches the agent bare.
   const text = automation.prompt?.trim()
-  if (automation.reuseSession && automation.workspaceMode === 'existing' && text) {
+  if (
+    automation.reuseSession &&
+    automation.workspaceMode === 'existing' &&
+    text &&
+    !automation.agentProfileId
+  ) {
     const reused = await sendToReusableSession(
       runtime,
       { ...request, text },
@@ -63,6 +66,13 @@ export async function launchAutomationTerminalAgent(
       return reused
     }
   }
+  // Why: written before any terminal opens, so a refused profile leaves no run terminal behind.
+  const agentProfile = await prepareAutomationAgentProfile({
+    automation,
+    repo: target.repo,
+    cwd: selectedWorkspace?.path ?? target.repo.path,
+    settings: request.settings
+  })
   const execution: AgentLaunchSurfaceExecution = {
     runtime,
     intent: {
@@ -83,7 +93,8 @@ export async function launchAutomationTerminalAgent(
         const { startupPrompt: _prompt, ...create } = buildAutomationWorktreeCreateArgs({
           automation,
           run,
-          repo: target.repo
+          repo: target.repo,
+          ...(agentProfile ? { agentProfile } : {})
         })
         let startupTerminalCreation: RuntimeTerminalCreate | undefined
         const created = await runtime.createManagedWorktree({
@@ -137,6 +148,7 @@ export async function launchAutomationTerminalAgent(
             title: run.title,
             suppressStartupUpdatePrompt: true,
             ...automationTerminalLaunchInputs(automation),
+            ...(agentProfile ? { agentProfile } : {}),
             // Run now is the user's act and may start a stopped WSL distro; a scheduled run never does.
             ...(run.trigger === 'scheduled' ? {} : { wslUserAct: true as const }),
             surfaceOwner: false
@@ -264,31 +276,6 @@ async function sendToReusableSession(
   }
 }
 
-/** A missing workspace or one owned by a paired server is a typed skip, never a fresh local launch. */
-async function resolveLocalExistingWorkspace(
-  runtime: OrcaRuntimeService,
-  automation: Automation,
-  target: AutomationRepoRunTarget
-) {
-  const unavailable = new AutomationDispatchRefusedError(automationRunFailure('targetUnavailable'))
-  const selected = await runtime
-    .resolveManagedTerminalWorkspaceTarget(
-      `id:${requireWorkspaceId(automation)}`,
-      parseWorkspaceKey(automation.workspaceId ?? '')?.type === 'folder'
-        ? undefined
-        : getRepoExecutionHostId(target.repo),
-      false
-    )
-    .catch((error: unknown) => {
-      throw error instanceof Error && error.message === 'selector_not_found' ? unavailable : error
-    })
-  const hostId = selected.scope.folderWorkspace?.executionHostId ?? selected.managedWorktree?.hostId
-  if (!selected.managedWorktree || parseExecutionHostId(hostId)?.kind === 'runtime') {
-    throw unavailable
-  }
-  return selected
-}
-
 export type RunOwnHandleRuntime = Pick<
   OrcaRuntimeService,
   'getTerminalHandleForPaneKey' | 'getTerminalPtyIdForHandle' | 'getPtyLivenessVerdict'
@@ -306,11 +293,4 @@ export function runOwnHandle(runtime: RunOwnHandleRuntime, run: AutomationRun): 
     runtime.getPtyLivenessVerdict(run.terminalPtyId)?.status !== 'exited'
     ? handle
     : null
-}
-
-function requireWorkspaceId(automation: Automation): string {
-  if (!automation.workspaceId) {
-    throw new Error('The target workspace is no longer available.')
-  }
-  return automation.workspaceId
 }
