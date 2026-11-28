@@ -2,6 +2,7 @@ import { join } from 'node:path'
 import { getAppEnvironment } from '../../../shared/app-lifecycle/app-environment'
 import type { Automation } from '../../../shared/automations/automation-definition'
 import type { GlobalSettings } from '../../../shared/settings/global-settings-types'
+import type { ClaudeAgentProfile } from '../../../shared/agent-profile/agent-profile-types'
 import type { Repo } from '../../../shared/repository/repo-types'
 import { repoIsRemote } from '../../../shared/agent-launch/startup/agent-launch-remote'
 import { isWslUncPath } from '../../../shared/file-access/wsl-paths'
@@ -10,6 +11,7 @@ import {
   AgentProfileLaunchError,
   type AgentProfileLaunchRequest
 } from '../../../shared/agent-profile/claude-profile-startup-args'
+import { buildAgentProfileCatalog } from '../../claude/agent-profile/agent-profile-catalog-service'
 import { prepareAgentProfileForPtySpawn } from '../../claude/agent-profile/agent-profile-spawn-preparation'
 import { AutomationRunLaunchError } from './automation-launch'
 
@@ -26,7 +28,13 @@ export async function prepareAutomationAgentProfile(args: {
   automation: Pick<Automation, 'agentProfileId' | 'agentId'>
   repo: Pick<Repo, 'connectionId' | 'executionHostId' | 'path'>
   cwd: string
-  settings: Pick<GlobalSettings, 'agentProfiles'> | undefined
+  /** Local profiles plus the central folder; a central profile is not in `agentProfiles`. */
+  settings:
+    | Pick<
+        GlobalSettings,
+        'agentProfiles' | 'agentProfileCentralDir' | 'agentProfileDefaultBaselines'
+      >
+    | undefined
   userDataDir?: string
 }): Promise<AgentProfileLaunchRequest | undefined> {
   const { automation, repo, cwd } = args
@@ -35,6 +43,7 @@ export async function prepareAutomationAgentProfile(args: {
     return undefined
   }
   const rootDir = args.userDataDir ?? join(getAppEnvironment().getPath('userData'))
+  let profile: ClaudeAgentProfile
   try {
     if (automation.agentId !== 'claude') {
       throw new AgentProfileLaunchError('agent_profile_agent_unsupported')
@@ -42,10 +51,12 @@ export async function prepareAutomationAgentProfile(args: {
     if (repoIsRemote(repo) || isWslUncPath(cwd) || isWslUncPath(repo.path)) {
       throw new AgentProfileLaunchError('agent_profile_host_unsupported')
     }
-    await prepareAgentProfileForPtySpawn({
+    // Why the catalog: a read-only team profile lives in the central folder, not in settings.
+    const catalog = await buildAgentProfileCatalog(args.settings ?? {})
+    profile = await prepareAgentProfileForPtySpawn({
       profileId: id,
       cwd,
-      settings: args.settings,
+      settings: { agentProfiles: catalog.entries.map((entry) => entry.profile) },
       userDataDir: rootDir
     })
   } catch (error) {
@@ -54,5 +65,6 @@ export async function prepareAutomationAgentProfile(args: {
     }
     throw error
   }
-  return { id, rootDir }
+  // The startup plan reads settings.agentProfiles only; the resolved profile covers a central one.
+  return { id, rootDir, profile }
 }

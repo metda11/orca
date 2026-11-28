@@ -38,7 +38,12 @@ export async function launchAutomationTerminalAgent(
     run: Pick<AutomationRun, 'id' | 'title' | 'scheduledFor' | 'trigger'>
     target: AutomationRepoRunTarget
     runs: readonly AutomationRun[]
-    settings: Pick<GlobalSettings, 'agentProfiles'> | undefined
+    settings:
+      | Pick<
+          GlobalSettings,
+          'agentProfiles' | 'agentProfileCentralDir' | 'agentProfileDefaultBaselines'
+        >
+      | undefined
   }
 ): Promise<AutomationTerminalAgentLaunch> {
   const { automation, run, target } = request

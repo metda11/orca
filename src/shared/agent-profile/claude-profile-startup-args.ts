@@ -18,6 +18,11 @@ export type AgentProfileLaunchRequest = {
   id: string
   /** Orca's userData folder on the machine that runs the agent. */
   rootDir: string
+  /**
+   * The profile main resolved for this start. Set when it may not live in `settings.agentProfiles`
+   * (a central, read-only profile); the plan then does not look the id up again.
+   */
+  profile?: ClaudeAgentProfile
 }
 
 /** Refusal codes; hosts show them instead of starting a profile-less agent. */
@@ -66,7 +71,10 @@ export function resolveClaudeProfileStartupArgs(args: {
   if (args.isRemote) {
     throw new AgentProfileLaunchError('agent_profile_host_unsupported')
   }
-  const profile = findClaudeAgentProfile(args.profiles, args.request.id)
+  const profile =
+    args.request.profile?.id === args.request.id
+      ? args.request.profile
+      : findClaudeAgentProfile(args.profiles, args.request.id)
   const files = claudeProfileLaunchFiles(args.request.rootDir, profile.id)
   // The argv does not depend on installed plugins; only the settings file content does.
   const { argv } = buildClaudeProfileLaunch(profile, { installedPluginIds: [], files })
