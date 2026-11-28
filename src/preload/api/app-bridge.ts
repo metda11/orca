@@ -9,6 +9,7 @@ import type {
   AgentProfileCatalog,
   ResetDefaultAgentProfileResult
 } from '../../shared/agent-profile/agent-profile-catalog'
+import type { ProfilePaneBinding } from '../../shared/agent-profile/loadout/profile-pane-binding'
 import type { MarkdownDocument } from '../../shared/file-listing/file-document'
 import type { WriteTerminalRenderDesyncEvidenceArgs } from '../../shared/terminal/diagnostics/terminal-render-desync-evidence'
 import {
@@ -116,6 +117,8 @@ export const appApi = {
     ipcRenderer.invoke('app:preflightAgentProfile', request),
   getAgentProfileCatalog: (): Promise<AgentProfileCatalog> =>
     ipcRenderer.invoke('app:getAgentProfileCatalog'),
+  getAgentProfilePaneBindings: (): Promise<Record<string, ProfilePaneBinding>> =>
+    ipcRenderer.invoke('app:getAgentProfilePaneBindings'),
   resetDefaultAgentProfile: (id: string): Promise<ResetDefaultAgentProfileResult> =>
     ipcRenderer.invoke('app:resetDefaultAgentProfile', id),
   getFloatingMarkdownDirectory: (): Promise<string> =>

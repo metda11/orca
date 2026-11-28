@@ -31,8 +31,35 @@ function normalizeCwd(cwd: string): string {
 
 type MatchedRun = { run: ProfileRunRecord; session: ClaudeUsageSession }
 
-/** One session per run and one run per session; anything else is left unmatched instead of guessed. */
+/**
+ * A run that knows its pane binds to the session its first hook event named: exact, no clock or folder.
+ * Only records written before that binding (no paneKey) fall back to the folder and time window; a
+ * bound-pane run whose session never reported stays unmatched instead of guessed.
+ */
 export function matchProfileRuns(
+  runs: readonly ProfileRunRecord[],
+  sessions: readonly ClaudeUsageSession[]
+): MatchedRun[] {
+  const sessionById = new Map<string, ClaudeUsageSession>()
+  for (const session of sessions) {
+    sessionById.set(session.sessionId, session)
+  }
+  const matched: MatchedRun[] = []
+  const takenSessionIds = new Set<string>()
+  for (const run of runs) {
+    const session = run.sessionId ? sessionById.get(run.sessionId) : undefined
+    if (session && !takenSessionIds.has(session.sessionId)) {
+      takenSessionIds.add(session.sessionId)
+      matched.push({ run, session })
+    }
+  }
+  const legacyRuns = runs.filter((run) => run.paneKey === undefined)
+  const legacySessions = sessions.filter((session) => !takenSessionIds.has(session.sessionId))
+  return [...matched, ...matchLegacyProfileRuns(legacyRuns, legacySessions)]
+}
+
+/** Pre-binding records: one session per run and one run per session, anything else stays unmatched. */
+function matchLegacyProfileRuns(
   runs: readonly ProfileRunRecord[],
   sessions: readonly ClaudeUsageSession[]
 ): MatchedRun[] {

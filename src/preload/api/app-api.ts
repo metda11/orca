@@ -13,6 +13,7 @@ import type {
   AgentProfileCatalog,
   ResetDefaultAgentProfileResult
 } from '../../shared/agent-profile/agent-profile-catalog'
+import type { ProfilePaneBinding } from '../../shared/agent-profile/loadout/profile-pane-binding'
 import type { MarkdownDocument } from '../../shared/file-listing/file-document'
 import type { PersistedUIState } from '../../shared/orca-profiles/persisted-ui-state-types'
 import type { AgentProfilePreflightFinding } from '../../shared/agent-profile/agent-profile-preflight'
@@ -87,6 +88,8 @@ export type AppApi = {
   ) => Promise<AgentProfilePreflightFinding[]>
   /** Central, default and local profiles as the picker shows them; seeds bundled defaults on first call. */
   getAgentProfileCatalog: () => Promise<AgentProfileCatalog>
+  /** Profile each terminal pane's agent was started with, by pane key; panes without one are absent. */
+  getAgentProfilePaneBindings: () => Promise<Record<string, ProfilePaneBinding>>
   /** Back to the bundled template; an edited copy is kept as a separate local profile. */
   resetDefaultAgentProfile: (id: string) => Promise<ResetDefaultAgentProfileResult>
   /** App-owned directory for auto-created Floating Workspace notes. */
