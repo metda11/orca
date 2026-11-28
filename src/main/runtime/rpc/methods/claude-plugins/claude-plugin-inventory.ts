@@ -41,13 +41,6 @@ export async function claudePluginReadRequest(
   const cwdDistro = cwd ? wslDistroForPath(cwd) : null
   const accountDistro = accountHomePath ? wslDistroForPath(accountHomePath) : null
   const wslDistro = cwdDistro ?? accountDistro
-  // A distro's UNC path is absolute on Windows; the check is for host paths.
-  if (
-    (cwd && !cwdDistro && !isAbsolute(cwd)) ||
-    (accountHomePath && !accountDistro && !isAbsolute(accountHomePath))
-  ) {
-    throw new Error('The Claude plugin inventory needs absolute folders.')
-  }
   // The Windows account's folder says nothing about a distro's Claude (and the reverse), so a mix is refused.
   if (
     (cwd && Boolean(cwdDistro) !== Boolean(wslDistro)) ||
@@ -57,6 +50,13 @@ export async function claudePluginReadRequest(
     throw new Error(
       'The workspace and the Claude account folder must both be on this host or in the same WSL distribution.'
     )
+  }
+  // A distro's UNC path is absolute on Windows; the check is for host paths.
+  if (
+    (cwd && !cwdDistro && !isAbsolute(cwd)) ||
+    (accountHomePath && !accountDistro && !isAbsolute(accountHomePath))
+  ) {
+    throw new Error('The Claude plugin inventory needs absolute folders.')
   }
   if (wslDistro) {
     // Passive callers must not boot a stopped distro; this throws instead.
