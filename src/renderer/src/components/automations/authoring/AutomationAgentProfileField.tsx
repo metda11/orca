@@ -10,6 +10,8 @@ import { useTranslate } from '@/i18n/use-translate'
 import { AUTOMATION_EDITOR_SECTION_LABEL_CLASS, Field } from '../automation-page-parts'
 import type { AutomationDraft } from './AutomationEditorDialog'
 import { automationProfileOffered } from './automation-agent-profile-field'
+import { AutomationAgentProfileWeight } from './AutomationAgentProfileWeight'
+import type { ClaudeAgentProfile } from '../../../../../shared/agent-profile/agent-profile-types'
 
 const NONE_VALUE = '__none__'
 
@@ -20,7 +22,7 @@ type AutomationAgentProfileFieldProps = {
   onDraftChange: (updater: (current: AutomationDraft) => AutomationDraft) => void
 }
 
-type ProfileOption = { id: string; name: string }
+type ProfileOption = { id: string; name: string; profile: ClaudeAgentProfile }
 
 export function AutomationAgentProfileField({
   draft,
@@ -46,7 +48,11 @@ export function AutomationAgentProfileField({
           setOptions(
             catalog.entries
               .filter((entry) => entry.origin !== 'central')
-              .map((entry) => ({ id: entry.profile.id, name: entry.profile.name }))
+              .map((entry) => ({
+                id: entry.profile.id,
+                name: entry.profile.name,
+                profile: entry.profile
+              }))
           )
         }
       })
@@ -72,6 +78,7 @@ export function AutomationAgentProfileField({
   }
 
   const listed = options.some((option) => option.id === selected)
+  const selectedProfile = options.find((option) => option.id === selected)?.profile ?? null
   return (
     <Field
       className="mb-4"
@@ -102,6 +109,7 @@ export function AutomationAgentProfileField({
           ))}
         </SelectContent>
       </Select>
+      {selectedProfile ? <AutomationAgentProfileWeight profile={selectedProfile} /> : null}
     </Field>
   )
 }

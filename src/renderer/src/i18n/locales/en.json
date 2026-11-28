@@ -27347,7 +27347,12 @@
     "agentProfile": {
       "label": "Agent profile",
       "none": "No profile",
-      "notUsed": "The agent profile “{{id}}” only applies to a Claude terminal run without session reuse. Saving removes it."
+      "notUsed": "The agent profile “{{id}}” only applies to a Claude terminal run without session reuse. Saving removes it.",
+      "weightEstimated": "Estimated: about {{tokens}} tokens ({{servers}} MCP servers, flat guess per server)",
+      "weightMeasured": "Measured: {{tokens}} tokens (plugins)",
+      "weightMeasuredPending": "Measured: at least {{tokens}} tokens (plugins), {{plugins}} still measuring",
+      "weightMeasuring": "Measuring context weight…",
+      "weightUnavailable": "Context weight is not available here."
     },
     "botTarget": {
       "chat": "{{name}}'s Chat",
